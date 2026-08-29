@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { YELLOW_GRID_VALUES } from "./constants";
+import { YELLOW_GRID_LAYOUT } from "./constants";
 import { canCross, computeBlueSum, getBlueCrossTargets, getCrossTargets, orangeRecordedValue } from "./legality";
 import { createEmptySheet } from "./sheet";
 import type { Sheet } from "./types";
@@ -60,9 +60,9 @@ describe("canCross yellow", () => {
 
   it("rejects values with no matching open cell", () => {
     let sheet = createEmptySheet();
-    // Cross both cells showing 2 (flat indices 0 and 5).
-    sheet = crossYellow(sheet, 0);
-    sheet = crossYellow(sheet, 5);
+    // Cross both open cells showing 2 (flat indices 4 and 10).
+    sheet = crossYellow(sheet, 4);
+    sheet = crossYellow(sheet, 10);
     expect(canCross(sheet, "yellow", 2)).toBe(false);
   });
 
@@ -77,7 +77,7 @@ describe("canCross yellow", () => {
     for (const { index } of targets) {
       const row = Math.floor(index / 4);
       const col = index % 4;
-      expect(YELLOW_GRID_VALUES[row][col]).toBe(5);
+      expect(YELLOW_GRID_LAYOUT[row][col]).toBe(5);
     }
   });
 });
@@ -184,8 +184,11 @@ describe("canCross orange", () => {
 
   it("records multiplied values for scoring", () => {
     const sheet = createEmptySheet();
+    expect(orangeRecordedValue(sheet, 3, 6)).toBe(12);
     expect(orangeRecordedValue(sheet, 6, 6)).toBe(12);
-    expect(orangeRecordedValue(sheet, 9, 6)).toBe(18);
+    expect(orangeRecordedValue(sheet, 8, 6)).toBe(12);
+    expect(orangeRecordedValue(sheet, 10, 6)).toBe(18);
+    expect(orangeRecordedValue(sheet, 9, 6)).toBe(6);
   });
 });
 

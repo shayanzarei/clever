@@ -73,10 +73,10 @@ describe("scoreYellow", () => {
   });
 
   it.each([
-    [0, 4],
-    [1, 6],
-    [2, 10],
-    [3, 12],
+    [0, 10],
+    [1, 14],
+    [2, 16],
+    [3, 20],
   ] as const)("awards column %i points (%i)", (column, points) => {
     const sheet = crossYellowColumn(createEmptySheet(), column);
     expect(scoreYellow(sheet)).toBe(points);
@@ -87,7 +87,7 @@ describe("scoreYellow", () => {
     let sheet = createEmptySheet();
     sheet = crossYellowColumn(sheet, 0);
     sheet = crossYellowColumn(sheet, 3);
-    expect(scoreYellow(sheet)).toBe(4 + 12);
+    expect(scoreYellow(sheet)).toBe(10 + 20);
   });
 
   it("ignores partial columns", () => {
@@ -165,7 +165,7 @@ describe("scoreFoxes", () => {
 
   it("multiplies fox count by the lowest color score", () => {
     let sheet = createEmptySheet();
-    sheet = crossYellowColumn(sheet, 0); // yellow = 4
+    sheet = crossYellowColumn(sheet, 0); // yellow = 10
     sheet = crossBlueCount(sheet, 6); // blue = 16
     sheet = crossGreenThrough(sheet, 0); // green = 1 ← floor
     sheet = fillOrange(sheet, [2]); // orange = 2
@@ -183,7 +183,7 @@ describe("scoreFoxes", () => {
 
   it("matches rulebook example (orange floor 5, 2 foxes → 10)", () => {
     let sheet = createEmptySheet();
-    sheet = crossYellowColumn(sheet, 1); // yellow = 6
+    sheet = crossYellowColumn(sheet, 1); // yellow = 14
     sheet = crossBlueCount(sheet, 4); // blue = 7
     sheet = crossGreenThrough(sheet, 2); // green = 6
     sheet = fillOrange(sheet, [5]); // orange = 5 ← floor

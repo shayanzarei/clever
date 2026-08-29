@@ -22,24 +22,24 @@ export function GameHeader({ game }: GameHeaderProps) {
   const active = game.players.find((player) => player.id === activePlayerId(game));
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+    <header className="game-header flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white px-2.5 py-2 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+        <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">
           Round {game.round} / {game.maxRounds}
         </p>
-        <h2 className="text-lg font-semibold text-zinc-900">
+        <h2 className="text-base font-semibold leading-tight text-zinc-900">
           {PHASE_LABELS[game.phase]}
         </h2>
         {active && game.phase !== "finished" && (
-          <p className="text-sm text-zinc-600">Active: {active.name}</p>
+          <p className="text-xs text-zinc-600">Active: {active.name}</p>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         {game.players.map((player) => (
           <div
             key={player.id}
-            className="rounded-lg bg-zinc-50 px-3 py-2 text-sm"
+            className="rounded-lg bg-zinc-50 px-2 py-1 text-xs"
           >
             <p className="font-medium text-zinc-800">{player.name}</p>
             <p className="text-zinc-500">{scoreSheet(player.sheet)} pts</p>

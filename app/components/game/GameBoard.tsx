@@ -58,6 +58,16 @@ export function GameBoard({
     return new Set(getClickableDice(game, actingPlayerId, plusOneMode, extraDieMode));
   }, [game, actingPlayerId, canAct, plusOneMode, extraDieMode]);
 
+  const sheetsToShow = useMemo(() => {
+    if (myPlayerId) {
+      return game.players.filter((player) => player.id === myPlayerId);
+    }
+    if (actingPlayerId) {
+      return game.players.filter((player) => player.id === actingPlayerId);
+    }
+    return [...game.players];
+  }, [game.players, myPlayerId, actingPlayerId]);
+
   function handleDieClick(die: DieState) {
     if (!actingPlayerId || !canAct) {
       return;
@@ -96,70 +106,68 @@ export function GameBoard({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 p-4 pb-10">
-      <GameHeader game={game} />
+    <div className="app-game game-board flex min-h-0 flex-1 flex-col gap-2 py-2">
+      <div className="game-board__hud">
+        <GameHeader game={game} />
 
-      {myPlayerId && !canAct && game.phase !== "finished" && (
-        <p className="rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600">
-          Waiting for{" "}
-          {game.players.find((player) => player.id === actingPlayerId)?.name ?? "opponent"}
-          …
-        </p>
-      )}
+        {myPlayerId && !canAct && game.phase !== "finished" && (
+          <p className="game-board__notice rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-600">
+            Waiting for{" "}
+            {game.players.find((player) => player.id === actingPlayerId)?.name ?? "opponent"}
+            …
+          </p>
+        )}
 
-      {syncing && (
-        <p className="text-sm text-zinc-500">Syncing…</p>
-      )}
+        {syncing && <p className="game-board__notice text-sm text-zinc-500">Syncing…</p>}
 
-      {error && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          <span>{error}</span>
-          <button type="button" className="font-medium underline" onClick={clearError}>
-            Dismiss
-          </button>
+        {error && (
+          <div className="game-board__notice flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+            <span>{error}</span>
+            <button type="button" className="font-medium underline" onClick={clearError}>
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        <div className="game-board__toolbar">
+          <ActionBar
+            game={game}
+            myPlayerId={myPlayerId}
+            onRoll={roll}
+            onReroll={() =>
+              dispatch({
+                type: "USE_REROLL",
+                playerId: activePlayerId(game),
+                values: rerollValues(game),
+              })
+            }
+            onSkipExtra={(playerId) =>
+              dispatch({ type: "SKIP_EXTRA_DIE", playerId })
+            }
+            onRoundBonus={(playerId, choice) =>
+              dispatch({ type: "CHOOSE_ROUND_BONUS", playerId, choice })
+            }
+            plusOneMode={plusOneMode}
+            onTogglePlusOne={() => setPlusOneMode((value) => !value)}
+            extraDieMode={extraDieMode}
+            onToggleExtraDie={() => setExtraDieMode((value) => !value)}
+          />
+
+          <DiceBoard
+            compact
+            dice={game.dice}
+            clickableIds={clickableDieIds}
+            selectedId={
+              game.players.find((player) => player.id === actingPlayerId)?.passiveDieId ??
+              null
+            }
+            onDieClick={clickableDieIds.size > 0 ? handleDieClick : undefined}
+          />
         </div>
-      )}
+      </div>
 
-      <ActionBar
-        game={game}
-        myPlayerId={myPlayerId}
-        onRoll={roll}
-        onReroll={() =>
-          dispatch({
-            type: "USE_REROLL",
-            playerId: activePlayerId(game),
-            values: rerollValues(game),
-          })
-        }
-        onSkipExtra={(playerId) =>
-          dispatch({ type: "SKIP_EXTRA_DIE", playerId })
-        }
-        onRoundBonus={(playerId, choice) =>
-          dispatch({ type: "CHOOSE_ROUND_BONUS", playerId, choice })
-        }
-        plusOneMode={plusOneMode}
-        onTogglePlusOne={() => setPlusOneMode((value) => !value)}
-        extraDieMode={extraDieMode}
-        onToggleExtraDie={() => setExtraDieMode((value) => !value)}
-      />
-
-      <DiceBoard
-        dice={game.dice}
-        clickableIds={clickableDieIds}
-        selectedId={
-          game.players.find((player) => player.id === actingPlayerId)?.passiveDieId ??
-          null
-        }
-        onDieClick={clickableDieIds.size > 0 ? handleDieClick : undefined}
-      />
-
-      <div
-        className={[
-          "grid gap-4",
-          game.players.length <= 2 ? "xl:grid-cols-2" : "grid-cols-1",
-        ].join(" ")}
-      >
-        {game.players.map((player) => {
+      <div className="game-board__sheets min-h-0 flex-1">
+        {sheetsToShow.map((player) => {
           const isActor = actingPlayerId === player.id && canAct;
           const options = isActor ? crossOptions : [];
           return (

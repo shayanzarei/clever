@@ -36,7 +36,7 @@ export function Lobby({ onStart }: LobbyProps) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-6 rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
           Pretty Clever

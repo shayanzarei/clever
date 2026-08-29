@@ -23,6 +23,126 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile-first game shell — landscape play */
+.app-shell {
+  min-height: 100%;
+  width: 100%;
+  background: #0b0c14;
+}
+
+.app-shell--play {
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.app-game {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: auto;
+  padding-inline: max(0.5rem, env(safe-area-inset-left))
+    max(0.5rem, env(safe-area-inset-right));
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@media (orientation: portrait) and (max-width: 640px) {
+  .app-game {
+    max-width: 26rem;
+  }
+}
+
+/* Landscape game board */
+.game-board {
+  min-height: 0;
+}
+
+.game-board__hud {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.game-board__hud > header {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.game-board__notice {
+  flex: 1 1 100%;
+}
+
+.game-board__toolbar {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.game-board__toolbar > section {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.game-board__sheets {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (orientation: landscape) {
+  .game-board__hud {
+    flex-wrap: nowrap;
+  }
+
+  .game-board__hud > header {
+    flex: 0 0 auto;
+    max-width: 14rem;
+  }
+
+  .game-board__toolbar {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+  }
+
+  .game-board__toolbar > section:first-child {
+    flex: 0 0 auto;
+  }
+
+  .game-board__toolbar > section:last-child {
+    flex: 1 1 auto;
+  }
+}
+
+.dice-board--compact {
+  min-width: 0;
+}
+
+.dice-tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem;
+  border-radius: 0.9rem;
+  background: #2b2735;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.touch-target {
+  min-height: 2.75rem;
+  touch-action: manipulation;
 }
 
 /* Form fields stay readable on light cards even in dark mode */

@@ -6,16 +6,21 @@ type BonusIconProps = {
   size?: "sm" | "md";
 };
 
-export function BonusIcon({ effect, claimed = false, size = "md" }: BonusIconProps) {
-  const className = [
-    "pad-icon",
-    `pad-icon--${iconVariant(effect)}`,
-    size === "sm" ? "pad-icon--sm" : "",
-    claimed ? "pad-icon--claimed" : "",
-  ].join(" ");
+export function bonusIconClass(effect: Effect): string {
+  return `pad-icon--${iconVariant(effect)}`;
+}
 
+export function BonusIcon({ effect, claimed = false, size = "md" }: BonusIconProps) {
   return (
-    <span className={className} aria-hidden>
+    <span
+      className={[
+        "pad-icon",
+        bonusIconClass(effect),
+        size === "sm" ? "pad-icon--sm" : "",
+        claimed ? "pad-icon--claimed" : "",
+      ].join(" ")}
+      aria-hidden
+    >
       <IconContent effect={effect} />
     </span>
   );
@@ -40,7 +45,7 @@ function iconVariant(effect: Effect): string {
     case "plus_one":
       return "plus-one";
     default:
-      return "neutral";
+      return "plus-one";
   }
 }
 
@@ -51,7 +56,6 @@ function IconContent({ effect }: { effect: Effect }) {
     case "cross_green_bonus":
       return <span className="pad-icon__x">✕</span>;
     case "fill_orange":
-      return <span className="pad-icon__num">{effect.value}</span>;
     case "fill_purple":
       return <span className="pad-icon__num">{effect.value}</span>;
     case "fox":
@@ -65,59 +69,32 @@ function IconContent({ effect }: { effect: Effect }) {
   }
 }
 
-export function StarBadge({
-  value,
-  claimed = false,
-  tone = "gold",
-}: {
-  value: number;
-  claimed?: boolean;
-  tone?: "gold" | "green" | "blue";
-}) {
-  return (
-    <span
-      className={[
-        "pad-star",
-        `pad-star--${tone}`,
-        claimed ? "pad-star--claimed" : "",
-      ].join(" ")}
-    >
-      {value}
-    </span>
-  );
-}
-
-export function TrackArrow({ tone }: { tone: "green" | "orange" | "purple" }) {
-  return (
-    <span className={`pad-track-arrow pad-track-arrow--${tone}`} aria-hidden>
-      →
-    </span>
-  );
-}
-
 export function BlueDieHint() {
   return (
-    <span className="pad-dice-hint" aria-hidden title="Blue + white die sum">
-      <span className="pad-dice-hint__die pad-dice-hint__die--blue">◆</span>
-      <span className="pad-dice-hint__plus">+</span>
-      <span className="pad-dice-hint__die pad-dice-hint__die--white">◆</span>
+    <span className="pad-dice-hint pad-cell pad-cell--hint" aria-hidden title="Blue + white die sum">
+      <svg className="pad-dice-hint__icon" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="3" y="3" width="18" height="18" rx="4" opacity="0.15" />
+        <circle cx="8" cy="8" r="1.5" />
+        <circle cx="16" cy="8" r="1.5" />
+        <circle cx="12" cy="12" r="1.5" />
+        <circle cx="8" cy="16" r="1.5" />
+        <circle cx="16" cy="16" r="1.5" />
+      </svg>
     </span>
   );
-}
-
-export function TrackSeparator({ tone }: { tone: "purple" }) {
-  return <span className={`pad-track-sep pad-track-sep--${tone}`}>&gt;</span>;
 }
 
 function FoxSvg() {
   return (
     <svg viewBox="0 0 24 24" className="pad-icon__fox" aria-hidden>
+      <path d="M4 3 9 9 4 9Z" fill="currentColor" />
+      <path d="M20 3 15 9 20 9Z" fill="currentColor" />
       <path
+        d="M12 20c-4 0-7-3-7-7 0-3 2-5 3-6l4 4 4-4c1 1 3 3 3 6 0 4-3 7-7 7z"
         fill="currentColor"
-        d="M12 3 8 8.5 4 7l2 6.5L3 22l9-4.5L21 22l-3-8.5L20 7l-4 1.5L12 3Z"
       />
-      <circle cx="9" cy="12" r="1.2" fill="#fff" />
-      <circle cx="15" cy="12" r="1.2" fill="#fff" />
+      <circle cx="9.5" cy="13" r="1" fill="#1a1a1a" />
+      <circle cx="14.5" cy="13" r="1" fill="#1a1a1a" />
     </svg>
   );
 }
@@ -136,10 +113,41 @@ function RerollSvg() {
   );
 }
 
-export function ColumnSeal({ value, claimed }: { value: number; claimed: boolean }) {
+/** @deprecated Foxglow uses pad-yellow__col-score */
+export function ColumnScoreBadge({
+  value,
+  claimed,
+}: {
+  value: number;
+  claimed: boolean;
+}) {
   return (
-    <span className={["pad-seal", claimed ? "pad-seal--claimed" : ""].join(" ")}>
+    <span
+      className={[
+        "pad-yellow__col-score",
+        claimed ? "pad-yellow__col-score--claimed" : "",
+      ].join(" ")}
+    >
       {value}
     </span>
   );
+}
+
+/** @deprecated */
+export function StarBadge(_props: {
+  value: number;
+  claimed?: boolean;
+  tone?: string;
+}) {
+  return null;
+}
+
+/** @deprecated */
+export function TrackArrow(_props: { tone: string }) {
+  return null;
+}
+
+/** @deprecated */
+export function ColumnSeal(props: { value: number; claimed: boolean }) {
+  return <ColumnScoreBadge {...props} />;
 }

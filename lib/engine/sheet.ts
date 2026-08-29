@@ -5,7 +5,7 @@ import {
   TRACK_LENGTH,
   YELLOW_COLS,
   YELLOW_COLUMN_SCORES,
-  YELLOW_GRID_VALUES,
+  YELLOW_GRID_LAYOUT,
   YELLOW_ROWS,
 } from "./constants";
 import type { Sheet } from "./types";
@@ -13,8 +13,12 @@ import type { Sheet } from "./types";
 export function createEmptySheet(): Sheet {
   return {
     yellow: {
-      grid: YELLOW_GRID_VALUES.map((row) =>
-        row.map((value) => ({ value, crossed: false })),
+      grid: YELLOW_GRID_LAYOUT.map((row) =>
+        row.map((cell) =>
+          cell === "x"
+            ? { value: 0, crossed: true, preprinted: true }
+            : { value: cell, crossed: false },
+        ),
       ),
       columnScored: Array.from({ length: YELLOW_COLS }, () => false),
     },

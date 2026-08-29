@@ -293,6 +293,59 @@ export async function startGame(
   return mapSnapshot(data as GameRow, members);
 }
 
+export async function updateMemberDisplayName(
+  code: string,
+  clientId: string,
+  displayName: string,
+): Promise<GameSnapshot> {
+  const row = await fetchGameByCode(code);
+  const members = await fetchMembers(row.id);
+  const member = members.find((entry) => entry.client_id === clientId);
+
+  if (!member) {
+    throw new GameRepositoryError("You are not in this game", 403, "FORBIDDEN");
+  }
+
+  if (row.status !== "lobby") {
+    throw new GameRepositoryError("Game already started", 409, "GAME_STARTED");
+  }
+
+  const nextName = displayName.trim() || defaultDisplayName(member.player_id);
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("game_members")
+    .update({ display_name: nextName })
+    .eq("id", member.id);
+
+  if (error) {
+    throw new GameRepositoryError(error.message, 500);
+  }
+
+  const nextMembers = await fetchMembers(row.id);
+  return mapSnapshot(row, nextMembers);
+}
+
+export async function deleteGame(code: string, clientId: string): Promise<void> {
+  const row = await fetchGameByCode(code);
+  const members = await fetchMembers(row.id);
+  const host = members.find((member) => member.player_id === "p1");
+
+  if (!host || host.client_id !== clientId) {
+    throw new GameRepositoryError("Only the host can delete the room", 403, "FORBIDDEN");
+  }
+
+  if (row.status !== "lobby") {
+    throw new GameRepositoryError("Game already started", 409, "GAME_STARTED");
+  }
+
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("games").delete().eq("id", row.id);
+
+  if (error) {
+    throw new GameRepositoryError(error.message, 500);
+  }
+}
+
 function assertMemberCanAct(
   game: Game,
   member: GameMemberRow,

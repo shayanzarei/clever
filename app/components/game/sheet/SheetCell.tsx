@@ -2,17 +2,19 @@
 
 import type { ReactNode } from "react";
 
+const CELL = "pad-cell";
+
 type SheetCellProps = {
   value: ReactNode;
   color: "yellow" | "blue" | "green" | "orange" | "purple";
   active?: boolean;
   crossed?: boolean;
   filled?: boolean;
+  preprinted?: boolean;
+  fluid?: boolean;
   disabled?: boolean;
   onClick?: () => void;
   title?: string;
-  diagonal?: boolean;
-  /** Faded label inside empty cells (e.g. orange ×2). */
   watermark?: string;
   prefix?: string;
 };
@@ -23,10 +25,11 @@ export function SheetCell({
   active = false,
   crossed = false,
   filled = false,
+  preprinted = false,
+  fluid = false,
   disabled = true,
   onClick,
   title,
-  diagonal = false,
   watermark,
   prefix,
 }: SheetCellProps) {
@@ -41,23 +44,50 @@ export function SheetCell({
       disabled={!clickable}
       onClick={onClick}
       className={[
-        "pad-cell",
-        `pad-cell--${color}`,
-        crossed ? "pad-cell--crossed" : "",
-        filled ? "pad-cell--filled" : "",
-        isEmpty && !watermark ? "pad-cell--empty" : "",
-        active ? "pad-cell--active" : "",
-        clickable ? "pad-cell--clickable" : "",
+        CELL,
+        `${CELL}--${color}`,
+        crossed ? `${CELL}--crossed` : "",
+        preprinted ? `${CELL}--preprinted` : "",
+        filled ? `${CELL}--filled` : "",
+        fluid ? `${CELL}--fluid` : "",
+        isEmpty && !watermark && !preprinted ? `${CELL}--empty` : "",
+        active ? `${CELL}--active` : "",
+        clickable ? `${CELL}--clickable` : "",
       ].join(" ")}
     >
-      {diagonal && <span className="pad-cell__diag" aria-hidden />}
-      {watermark && !filled && !crossed && (
-        <span className="pad-cell__watermark">{watermark}</span>
+      {watermark && !filled && !crossed && !preprinted && (
+        <span className={`${CELL}__watermark`}>{watermark}</span>
       )}
-      <span className="pad-cell__value">
-        {prefix}
-        {isEmpty && !watermark ? "·" : value}
+      <span className={`${CELL}__value`}>
+        {preprinted ? "✕" : prefix}
+        {!preprinted && (isEmpty && !watermark ? "·" : value)}
       </span>
     </button>
+  );
+}
+
+export function BonusSlot({
+  children,
+  claimed = false,
+}: {
+  children: React.ReactNode;
+  claimed?: boolean;
+}) {
+  return (
+    <span
+      className={["pad-bonus-slot", claimed ? "pad-bonus-slot--claimed" : ""].join(
+        " ",
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function FlowArrow({ direction = "right" }: { direction?: "right" | "down" }) {
+  return (
+    <span className="pad-flow-arrow" aria-hidden>
+      {direction === "down" ? "↓" : "→"}
+    </span>
   );
 }

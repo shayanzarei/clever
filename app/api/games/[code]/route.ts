@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { getGameSnapshot, updateGamePlayerCount } from "@/lib/server/game-repository";
+import {
+  deleteGame,
+  getGameSnapshot,
+  updateGamePlayerCount,
+} from "@/lib/server/game-repository";
 import { jsonError } from "@/lib/server/api-error";
 import { isPlayerCount } from "@/lib/game/player-seats";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
@@ -53,6 +57,29 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const snapshot = await updateGamePlayerCount(code, body.clientId, body.playerCount);
     return NextResponse.json(snapshot);
+  } catch (error) {
+    return jsonError(error);
+  }
+}
+
+export async function DELETE(request: Request, context: RouteContext) {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Supabase is not configured on the server" },
+      { status: 503 },
+    );
+  }
+
+  try {
+    const { code } = await context.params;
+    const body = (await request.json()) as { clientId?: string };
+
+    if (!body.clientId) {
+      return NextResponse.json({ error: "clientId is required" }, { status: 400 });
+    }
+
+    await deleteGame(code, body.clientId);
+    return NextResponse.json({ ok: true });
   } catch (error) {
     return jsonError(error);
   }

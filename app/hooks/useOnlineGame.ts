@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { poolDice } from "@/lib/engine/dice";
 import type { Action, Game } from "@/lib/engine/types";
-import { getClientId, getStoredPlayerId, storePlayerId } from "@/lib/client/session";
+import { getClientId, getStoredPlayerId, storePlayerId, clearStoredPlayerId } from "@/lib/client/session";
 import { getSupabaseBrowserClient, isSupabaseBrowserConfigured } from "@/lib/supabase/client";
 import type { GameSnapshot } from "@/lib/supabase/types";
 import type { PlayerCount, PlayerSeatId } from "@/lib/game/player-seats";
@@ -16,6 +16,7 @@ type OnlineGameState = {
   error: string | null;
   loading: boolean;
   syncing: boolean;
+  lobbyAction: "start" | "count" | "name" | "delete" | null;
 };
 
 export function useOnlineGame(code: string) {
@@ -27,6 +28,7 @@ export function useOnlineGame(code: string) {
     error: null,
     loading: true,
     syncing: false,
+    lobbyAction: null,
   });
 
   const applySnapshot = useCallback((snapshot: GameSnapshot) => {
@@ -36,6 +38,7 @@ export function useOnlineGame(code: string) {
       error: null,
       loading: false,
       syncing: false,
+      lobbyAction: null,
     }));
   }, []);
 
@@ -47,6 +50,10 @@ export function useOnlineGame(code: string) {
     if (storedPlayerId) {
       const response = await fetch(`/api/games/${normalizedCode}`);
       if (!response.ok) {
+        if (response.status === 404) {
+          clearStoredPlayerId(normalizedCode);
+          throw new Error("This room was closed by the host");
+        }
         const payload = (await response.json()) as { error?: string };
         throw new Error(payload.error ?? "Could not load game");
       }
@@ -118,6 +125,17 @@ export function useOnlineGame(code: string) {
 
     async function refreshSnapshot() {
       const response = await fetch(`/api/games/${normalizedCode}`);
+      if (response.status === 404) {
+        clearStoredPlayerId(normalizedCode);
+        setState((current) => ({
+          ...current,
+          snapshot: null,
+          error: "This room was closed by the host",
+          loading: false,
+          syncing: false,
+        }));
+        return;
+      }
       if (!response.ok) {
         return;
       }
@@ -243,7 +261,12 @@ export function useOnlineGame(code: string) {
   }, [dispatch, state.snapshot?.state]);
 
   const startGame = useCallback(async () => {
-    setState((current) => ({ ...current, syncing: true, error: null }));
+    setState((current) => ({
+      ...current,
+      syncing: true,
+      lobbyAction: "start",
+      error: null,
+    }));
     const response = await fetch(`/api/games/${normalizedCode}/start`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -257,6 +280,7 @@ export function useOnlineGame(code: string) {
         ...current,
         error: payload.error ?? "Could not start game",
         syncing: false,
+        lobbyAction: null,
       }));
       return;
     }
@@ -266,7 +290,12 @@ export function useOnlineGame(code: string) {
 
   const setPlayerCount = useCallback(
     async (playerCount: PlayerCount) => {
-      setState((current) => ({ ...current, syncing: true, error: null }));
+      setState((current) => ({
+        ...current,
+        syncing: true,
+        lobbyAction: "count",
+        error: null,
+      }));
       const response = await fetch(`/api/games/${normalizedCode}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -283,6 +312,7 @@ export function useOnlineGame(code: string) {
           ...current,
           error: payload.error ?? "Could not update player count",
           syncing: false,
+          lobbyAction: null,
         }));
         return;
       }
@@ -291,6 +321,75 @@ export function useOnlineGame(code: string) {
     },
     [applySnapshot, normalizedCode],
   );
+
+  const updateDisplayName = useCallback(
+    async (displayName: string) => {
+      setState((current) => ({
+        ...current,
+        syncing: true,
+        lobbyAction: "name",
+        error: null,
+      }));
+      const response = await fetch(`/api/games/${normalizedCode}/member`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: clientIdRef.current || getClientId(),
+          displayName,
+        }),
+      });
+
+      const payload = (await response.json()) as GameSnapshot & { error?: string };
+
+      if (!response.ok) {
+        setState((current) => ({
+          ...current,
+          error: payload.error ?? "Could not update name",
+          syncing: false,
+          lobbyAction: null,
+        }));
+        return;
+      }
+
+      applySnapshot(payload);
+    },
+    [applySnapshot, normalizedCode],
+  );
+
+  const deleteGameSession = useCallback(async (): Promise<boolean> => {
+    setState((current) => ({
+      ...current,
+      syncing: true,
+      lobbyAction: "delete",
+      error: null,
+    }));
+    const response = await fetch(`/api/games/${normalizedCode}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId: clientIdRef.current || getClientId() }),
+    });
+
+    const payload = (await response.json()) as { error?: string };
+
+    if (!response.ok) {
+      setState((current) => ({
+        ...current,
+        error: payload.error ?? "Could not delete room",
+        syncing: false,
+        lobbyAction: null,
+      }));
+      return false;
+    }
+
+    clearStoredPlayerId(normalizedCode);
+    setState((current) => ({
+      ...current,
+      snapshot: null,
+      syncing: false,
+      lobbyAction: null,
+    }));
+    return true;
+  }, [normalizedCode]);
 
   const game: Game | null = state.snapshot?.state ?? null;
 
@@ -301,10 +400,13 @@ export function useOnlineGame(code: string) {
     error: state.error,
     loading: state.loading,
     syncing: state.syncing,
+    lobbyAction: state.lobbyAction,
     dispatch,
     roll,
     startGame,
     setPlayerCount,
+    updateDisplayName,
+    deleteGameSession,
     clearError,
   };
 }

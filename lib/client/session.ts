@@ -31,3 +31,11 @@ export function getStoredPlayerId(code: string): PlayerSeatId | null {
 export function storePlayerId(code: string, playerId: PlayerSeatId): void {
   sessionStorage.setItem(playerIdKey(code), playerId);
 }
+
+export function clearStoredPlayerId(code: string): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  sessionStorage.removeItem(playerIdKey(code));
+  sessionStorage.removeItem(`pretty-clever:${code.toUpperCase()}:joinName`);
+}

@@ -23,7 +23,12 @@ export type DieState = DieFace & {
 
 export type YellowSheet = {
   /** 4×4 grid; each cell holds the printed value and whether it is crossed. */
-  grid: readonly (readonly { value: number; crossed: boolean }[])[];
+  grid: readonly (readonly {
+    value: number;
+    crossed: boolean;
+    /** Pre-printed ✕ on the pad — crossed from game start. */
+    preprinted?: boolean;
+  }[])[];
   /** Column completion bonuses already claimed (star circled). */
   columnScored: readonly boolean[];
 };

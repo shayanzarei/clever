@@ -41,11 +41,11 @@ export function ActionBar({
   const canRoll = canAct && (!myPlayerId || myPlayerId === activeId);
 
   return (
-    <section className="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <section className="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm">
       {game.phase === "active_roll" && canRoll && (
         <button
           type="button"
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white"
+          className="touch-target rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white"
           onClick={onRoll}
         >
           Roll {poolDice(game.dice).length} dice

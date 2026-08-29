@@ -40,7 +40,7 @@ function completeActiveTurn(game: Game): Game {
     playerId: activePlayerId(next),
     color: "yellow",
     value: 1,
-    targetIndex: 7,
+    targetIndex: 8,
   });
 
   next = roll(next, [
@@ -107,7 +107,7 @@ describe("round-start bonuses", () => {
       type: "CROSS",
       playerId: "p1",
       color: "yellow",
-      value: 2,
+      value: 3,
       targetIndex: 0,
     });
 
@@ -301,10 +301,10 @@ describe("passive slot fallback", () => {
       playerId: "p2",
       color: "yellow",
       value: 2,
-      targetIndex: 0,
+      targetIndex: 4,
     });
 
-    expect(game.players[1].sheet.yellow.grid[0][0].crossed).toBe(true);
+    expect(game.players[1].sheet.yellow.grid[1][0].crossed).toBe(true);
   });
 
   it("requires tray dice when the tray has a usable die", () => {
