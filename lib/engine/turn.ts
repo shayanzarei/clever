@@ -1,0 +1,90 @@
+import type { Game, Player } from "./types";
+import {
+  applyRoundStartActions,
+  beginRoundFourBonus,
+} from "./round-start";
+
+export function activePlayer(game: Game): Player {
+  return game.players[game.activePlayerIndex];
+}
+
+export function activePlayerId(game: Game): string {
+  return activePlayer(game).id;
+}
+
+export function isActivePlayer(game: Game, playerId: string): boolean {
+  return activePlayerId(game) === playerId;
+}
+
+export function passivePlayerIds(game: Game): string[] {
+  return game.players
+    .filter((player) => player.id !== activePlayerId(game))
+    .map((player) => player.id);
+}
+
+export function allPassivesCompleted(game: Game): boolean {
+  return passivePlayerIds(game).every((id) =>
+    game.passiveCompletedPlayerIds.includes(id),
+  );
+}
+
+export function clearActiveTurnState(game: Game): Game {
+  return {
+    ...game,
+    activeRollCount: 0,
+    awaitingCross: null,
+    passiveCompletedPlayerIds: [],
+    extraDieUsedIds: [],
+    extraDieActionsUsed: {},
+    players: game.players.map((player) => ({
+      ...player,
+      diceSlots: [null, null, null],
+      passiveDieId: null,
+    })),
+  };
+}
+
+export function extraDieActionsAvailable(game: Game, playerId: string): number {
+  const player = game.players.find((entry) => entry.id === playerId);
+  if (!player) {
+    return 0;
+  }
+  const used = game.extraDieActionsUsed[playerId] ?? 0;
+  return player.sheet.extraDice - used;
+}
+
+export function beginRound(game: Game): Game {
+  let next = applyRoundStartActions(game, game.round);
+  if (game.round === 4) {
+    next = beginRoundFourBonus(next);
+  }
+  return next;
+}
+
+export function advanceTurn(game: Game): Game {
+  const nextActiveIndex = (game.activePlayerIndex + 1) % game.playerCount;
+  const roundAdvanced = nextActiveIndex === 0;
+  const round = roundAdvanced ? game.round + 1 : game.round;
+  const finished = round > game.maxRounds;
+
+  let next: Game = clearActiveTurnState({
+    ...game,
+    activePlayerIndex: nextActiveIndex,
+    round,
+    phase: finished ? "finished" : "active_roll",
+  });
+
+  if (!finished) {
+    next = {
+      ...next,
+      dice: next.dice.map((die) => ({
+        ...die,
+        location: "pool" as const,
+        slotIndex: undefined,
+      })),
+    };
+    next = beginRound(next);
+  }
+
+  return next;
+}
