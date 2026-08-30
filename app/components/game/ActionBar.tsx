@@ -1,8 +1,10 @@
 import { poolDice } from "@/lib/engine/dice";
 import {
   activePlayerId,
+  canPlayerActNow,
   extraDieActionsAvailable,
   isActivePlayer,
+  playersActingNow,
 } from "@/lib/engine/turn";
 import type { Game } from "@/lib/engine/types";
 import type { PlayerSeatId } from "@/lib/game/player-seats";
@@ -15,6 +17,7 @@ type ActionBarProps = {
   onRoll: () => void;
   onReroll: () => void;
   onSkipExtra: (playerId: string) => void;
+  onUndoChoice: (playerId: string) => void;
   onRoundBonus: (playerId: string, choice: "black_x" | "black_six") => void;
   plusOneMode: boolean;
   onTogglePlusOne: () => void;
@@ -28,6 +31,7 @@ export function ActionBar({
   onRoll,
   onReroll,
   onSkipExtra,
+  onUndoChoice,
   onRoundBonus,
   plusOneMode,
   onTogglePlusOne,
@@ -36,9 +40,15 @@ export function ActionBar({
 }: ActionBarProps) {
   const activeId = activePlayerId(game);
   const active = game.players.find((player) => player.id === activeId);
-  const viewingPlayerId = resolveActingPlayerId(game);
-  const canAct = !myPlayerId || viewingPlayerId === myPlayerId;
+  const viewingPlayerId = myPlayerId ?? resolveActingPlayerId(game);
+  const canAct = Boolean(
+    viewingPlayerId && canPlayerActNow(game, viewingPlayerId),
+  );
   const canRoll = canAct && (!myPlayerId || myPlayerId === activeId);
+  const actingNow = playersActingNow(game);
+  const waitingOn = game.players.filter(
+    (player) => player.id !== viewingPlayerId && actingNow.includes(player.id),
+  );
 
   return (
     <section className="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm">
@@ -132,16 +142,30 @@ export function ActionBar({
           );
         })}
 
-      {game.awaitingCross && (
+      {canAct && canUndoChoice(game, viewingPlayerId) && (
+        <button
+          type="button"
+          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          onClick={() => viewingPlayerId && onUndoChoice(viewingPlayerId)}
+        >
+          Undo pick
+        </button>
+      )}
+
+      {canAct && game.awaitingCross && (
         <p className="text-sm text-amber-800">Click a highlighted sheet cell to cross.</p>
       )}
 
-      {game.pending.length > 0 && game.pendingPlayerId && (
+      {canAct && game.pending.length > 0 && game.pendingPlayerId && (
         <p className="text-sm text-amber-800">
           Resolve pending bonus on{" "}
           {game.players.find((player) => player.id === game.pendingPlayerId)?.name}
           &apos;s sheet.
         </p>
+      )}
+
+      {!canAct && game.phase !== "finished" && waitingOn.length > 0 && (
+        <ThinkingNotice names={waitingOn.map((player) => player.name)} />
       )}
 
       {game.phase === "finished" && (
@@ -167,6 +191,35 @@ function resolveActingPlayerId(game: Game): string | null {
     return game.awaitingCross.playerId;
   }
   return activePlayerId(game);
+}
+
+function ThinkingNotice({ names }: { names: string[] }) {
+  const label =
+    names.length === 1
+      ? `${names[0]} is thinking…`
+      : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]} are thinking…`;
+
+  return (
+    <p className="flex items-center gap-2 text-sm text-zinc-600" aria-live="polite">
+      <span className="thinking-dots" aria-hidden>
+        <span />
+        <span />
+        <span />
+      </span>
+      {label}
+    </p>
+  );
+}
+
+function canUndoChoice(game: Game, playerId: string | null): boolean {
+  if (!playerId || game.pending.length > 0) {
+    return false;
+  }
+  if (game.awaitingCross) {
+    return game.awaitingCross.playerId === playerId;
+  }
+  const player = game.players.find((entry) => entry.id === playerId);
+  return Boolean(player?.passiveDieId);
 }
 
 function canUsePlusOne(game: Game, playerId: string | null): boolean {

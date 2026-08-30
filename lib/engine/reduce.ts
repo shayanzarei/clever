@@ -21,6 +21,8 @@ import {
   getDie,
   moveRemainingPoolToTray,
   poolDice,
+  returnDieToPool,
+  trayedByChoice,
 } from "./dice";
 import { validatePassivePlusOneTarget, validatePassiveTake } from "./passive";
 import {
@@ -334,6 +336,7 @@ function chooseDie(
     throw new Error("Chosen die must be in the pool");
   }
 
+  const trayedDieIds = trayedByChoice(game.dice, action.dieId);
   const dice = chooseDieToSlot(game.dice, action.dieId, action.slotIndex);
   const diceSlots = [...player.diceSlots] as (typeof player.diceSlots)[number][];
   diceSlots[action.slotIndex] = dieFace(chosen);
@@ -344,9 +347,50 @@ function chooseDie(
       awaitingCross: {
         playerId: action.playerId,
         slotIndex: action.slotIndex,
+        trayedDieIds,
       },
     },
   );
+}
+
+function undoDieChoice(
+  game: Game,
+  action: Extract<Action, { type: "UNDO_DIE_CHOICE" }>,
+): Game {
+  if (game.pending.length > 0) {
+    throw new Error("Cannot undo while effects are pending");
+  }
+
+  const player = getPlayer(game, action.playerId);
+  const awaiting = game.awaitingCross;
+
+  if (awaiting?.playerId === action.playerId && awaiting.extraDieId) {
+    return bump(game, { awaitingCross: null });
+  }
+
+  if (awaiting?.playerId === action.playerId && awaiting.slotIndex !== undefined) {
+    const slot = awaiting.slotIndex;
+    const die = game.dice.find(
+      (entry) => entry.location === "slot" && entry.slotIndex === slot,
+    );
+    if (!die) {
+      throw new Error("Chosen die not found on table");
+    }
+
+    const dice = returnDieToPool(game.dice, die.id, awaiting.trayedDieIds ?? []);
+    const diceSlots = [...player.diceSlots] as (typeof player.diceSlots)[number][];
+    diceSlots[slot] = null;
+
+    return bump(updatePlayer({ ...game, dice }, action.playerId, { diceSlots }), {
+      awaitingCross: null,
+    });
+  }
+
+  if (player.passiveDieId) {
+    return bump(updatePlayer(game, action.playerId, { passiveDieId: null }), {});
+  }
+
+  throw new Error("No die selection to undo");
 }
 
 function passiveTake(
@@ -765,6 +809,8 @@ export function reduce(state: Game, action: Action): Game {
       return chooseDie(game, action);
     case "PASSIVE_TAKE":
       return passiveTake(game, action);
+    case "UNDO_DIE_CHOICE":
+      return undoDieChoice(game, action);
     case "USE_REROLL":
       return useReroll(game, action);
     case "USE_PLUS_ONE":

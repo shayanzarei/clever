@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { trayDice } from "./dice";
-import { activePlayerId } from "./turn";
+import { poolDice, trayDice } from "./dice";
+import { activePlayerId, canPlayerActNow, playersActingNow } from "./turn";
 import { reduce } from "./reduce";
 import type { Action, ColorArea, DieFace, DieValue, Game } from "./types";
 
@@ -27,6 +27,14 @@ function startGame(): Game {
     type: "START_GAME",
     playerCount: 2,
     playerNames: ["Alice", "Bob"],
+  });
+}
+
+function startThreePlayerGame(): Game {
+  return reduce({} as Game, {
+    type: "START_GAME",
+    playerCount: 3,
+    playerNames: ["Alice", "Bob", "Cara"],
   });
 }
 
@@ -114,7 +122,31 @@ describe("turn flow", () => {
     expect(tray.map((d) => d.color).sort()).toEqual(
       ["blue", "green", "orange", "white", "yellow"].sort(),
     );
-    expect(game.awaitingCross).toEqual({ playerId: "p1", slotIndex: 0 });
+    expect(game.awaitingCross).toEqual({
+      playerId: "p1",
+      slotIndex: 0,
+      trayedDieIds: tray.map((d) => d.id),
+    });
+  });
+
+  it("UNDO_DIE_CHOICE returns the pick and its sweep to the pool", () => {
+    const rolled = roll(startGame());
+    let game = reduce(rolled, {
+      type: "CHOOSE_DIE",
+      playerId: "p1",
+      dieId: "die-purple",
+      slotIndex: 0,
+    });
+
+    game = reduce(game, { type: "UNDO_DIE_CHOICE", playerId: "p1" });
+
+    expect(trayDice(game.dice)).toEqual([]);
+    expect(poolDice(game.dice).map((d) => d.id).sort()).toEqual(
+      poolDice(rolled.dice).map((d) => d.id).sort(),
+    );
+    expect(game.awaitingCross).toBeNull();
+    expect(game.players[0].diceSlots).toEqual([null, null, null]);
+    expect(game.phase).toBe("active_choose");
   });
 
   it("requires CROSS after CHOOSE_DIE before next roll", () => {
@@ -159,6 +191,25 @@ describe("turn flow", () => {
     game = reduce(game, { type: "PASSIVE_TAKE", playerId: "p2", dieId: "die-yellow" });
     const dieStillOnTray = game.dice.find((d) => d.id === "die-yellow")?.location;
     expect(dieStillOnTray).toBe("tray");
+  });
+
+  it("lets every unfinished passive player act at the same time", () => {
+    let game = completeActiveTurn(startThreePlayerGame());
+    expect(game.phase).toBe("passive_choose");
+    expect(playersActingNow(game)).toEqual(["p2", "p3"]);
+    expect(canPlayerActNow(game, "p1")).toBe(false);
+
+    game = reduce(game, { type: "PASSIVE_TAKE", playerId: "p3", dieId: "die-blue" });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p3",
+      color: "blue",
+      blueDie: 3,
+      whiteDie: 1,
+    });
+
+    expect(playersActingNow(game)).toEqual(["p2"]);
+    expect(canPlayerActNow(game, "p3")).toBe(false);
   });
 
   it("advances round after each player was active once (2p)", () => {

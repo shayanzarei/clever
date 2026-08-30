@@ -45,21 +45,18 @@ export function ScorePad({
   crossOptions = [],
   onCross,
 }: ScorePadProps) {
-  const optionSet = new Set(crossOptions.map(crossOptionKey));
+  const optionByBox = new Map(
+    crossOptions.map((option) => [crossOptionKey(option), option]),
+  );
   const scores = colorScores(sheet);
   const blueMarks = sheet.blue.boxes.filter((box) => box.crossed).length;
 
-  function isActive(color: ColorArea, targetIndex: number, value: number): boolean {
-    return optionSet.has(crossOptionKey({ color, targetIndex, value }));
+  function isActive(color: ColorArea, targetIndex: number): boolean {
+    return optionByBox.has(crossOptionKey({ color, targetIndex }));
   }
 
-  function handleCross(color: ColorArea, targetIndex: number, value: number) {
-    const option = crossOptions.find(
-      (entry) =>
-        entry.color === color &&
-        entry.targetIndex === targetIndex &&
-        entry.value === value,
-    );
+  function handleCross(color: ColorArea, targetIndex: number) {
+    const option = optionByBox.get(crossOptionKey({ color, targetIndex }));
     if (option) {
       onCross?.(option);
     }
@@ -124,8 +121,8 @@ export function ScorePad({
   );
 }
 
-type CrossHandler = (color: ColorArea, targetIndex: number, value: number) => void;
-type ActiveCheck = (color: ColorArea, targetIndex: number, value: number) => boolean;
+type CrossHandler = (color: ColorArea, targetIndex: number) => void;
+type ActiveCheck = (color: ColorArea, targetIndex: number) => boolean;
 
 function ZoneLabel({ children }: { children: string }) {
   return <div className="pad-zone__label">{children}</div>;
@@ -161,7 +158,7 @@ function YellowBlock({
         {sheet.yellow.grid.flatMap((row, rowIndex) => [
           ...row.map((cell, colIndex) => {
             const index = rowIndex * row.length + colIndex;
-            const active = isActive("yellow", index, cell.value);
+            const active = isActive("yellow", index);
             return (
               <SheetCell
                 key={index}
@@ -171,9 +168,7 @@ function YellowBlock({
                 preprinted={cell.preprinted}
                 active={active}
                 disabled={!active || cell.preprinted}
-                onClick={
-                  active ? () => onCross("yellow", index, cell.value) : undefined
-                }
+                onClick={active ? () => onCross("yellow", index) : undefined}
               />
             );
           }),
@@ -247,7 +242,7 @@ function BlueBlock({
             {rowIndex === 0 && <BlueDieHint />}
             {row.map((index) => {
               const box = sheet.blue.boxes[index];
-              const active = isActive("blue", index, box.sum);
+              const active = isActive("blue", index);
               return (
                 <SheetCell
                   key={index}
@@ -256,9 +251,7 @@ function BlueBlock({
                   crossed={box.crossed}
                   active={active}
                   disabled={!active}
-                  onClick={
-                    active ? () => onCross("blue", index, box.sum) : undefined
-                  }
+                  onClick={active ? () => onCross("blue", index) : undefined}
                 />
               );
             })}
@@ -313,7 +306,7 @@ function GreenTrack({
       </div>
       <div className="pad-track__row">
         {sheet.green.boxes.map((box, index) => {
-          const active = isActive("green", index, box.threshold);
+          const active = isActive("green", index);
           const bonus = GREEN_SLOT_BONUSES[index];
           const clickable = active;
           return (
@@ -322,9 +315,7 @@ function GreenTrack({
               type="button"
               disabled={!clickable}
               onClick={
-                clickable
-                  ? () => onCross("green", index, box.threshold)
-                  : undefined
+                clickable ? () => onCross("green", index) : undefined
               }
               className={[
                 "pad-track__box",
@@ -361,8 +352,7 @@ function OrangeTrack({
       <ZoneLabel>ORANGE</ZoneLabel>
       <div className="pad-track__row">
         {sheet.orange.boxes.map((box, index) => {
-          const crossValue = box.value ?? 6;
-          const active = isActive("orange", index, crossValue);
+          const active = isActive("orange", index);
           const bonus = ORANGE_SLOT_BONUSES[index];
           const multiplier = ORANGE_MULTIPLIERS[index];
           const clickable = active;
@@ -372,9 +362,7 @@ function OrangeTrack({
               type="button"
               disabled={!clickable}
               onClick={
-                clickable
-                  ? () => onCross("orange", index, crossValue)
-                  : undefined
+                clickable ? () => onCross("orange", index) : undefined
               }
               className={[
                 "pad-track__box",
@@ -420,8 +408,7 @@ function PurpleTrack({
       <ZoneLabel>PURPLE</ZoneLabel>
       <div className="pad-track__row">
         {sheet.purple.boxes.map((box, index) => {
-          const crossValue = box.value ?? 6;
-          const active = isActive("purple", index, crossValue);
+          const active = isActive("purple", index);
           const bonus = PURPLE_SLOT_BONUSES[index];
           const clickable = active;
           return (
@@ -430,9 +417,7 @@ function PurpleTrack({
               type="button"
               disabled={!clickable}
               onClick={
-                clickable
-                  ? () => onCross("purple", index, crossValue)
-                  : undefined
+                clickable ? () => onCross("purple", index) : undefined
               }
               className={[
                 "pad-track__box",

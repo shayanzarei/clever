@@ -182,8 +182,14 @@ export function getSheetCrossOptions(
   return [];
 }
 
-export function crossOptionKey(option: SheetCrossOption): string {
-  return `${option.color}:${option.targetIndex}:${option.value}`;
+/**
+ * A die can only ever offer one option per box, so the die face is deliberately
+ * left out of the key: the sheet knows the box it draws, not the roll.
+ */
+export function crossOptionKey(
+  option: Pick<SheetCrossOption, "color" | "targetIndex">,
+): string {
+  return `${option.color}:${option.targetIndex}`;
 }
 
 export function crossActionFromOption(

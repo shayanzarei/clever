@@ -28,6 +28,56 @@ export function allPassivesCompleted(game: Game): boolean {
   );
 }
 
+/**
+ * Whether this player may act right now. During the passive phase every
+ * passive player who has not finished may act at the same time.
+ */
+export function canPlayerActNow(game: Game, playerId: string): boolean {
+  if (game.phase === "finished") {
+    return false;
+  }
+
+  if (game.pending.length > 0) {
+    return game.pendingPlayerId === playerId;
+  }
+
+  if (game.phase === "round_bonus_choose") {
+    return game.roundBonusPendingPlayerIds.includes(playerId);
+  }
+
+  if (game.awaitingCross) {
+    return game.awaitingCross.playerId === playerId;
+  }
+
+  switch (game.phase) {
+    case "active_roll":
+    case "active_choose":
+    case "active_extra":
+      return isActivePlayer(game, playerId);
+    case "passive_choose":
+      return (
+        !isActivePlayer(game, playerId) &&
+        !game.passiveCompletedPlayerIds.includes(playerId)
+      );
+    case "passive_extra":
+      // The engine pauses the other passives while an extra die is spent.
+      return (
+        !isActivePlayer(game, playerId) &&
+        !game.passiveCompletedPlayerIds.includes(playerId) &&
+        extraDieActionsAvailable(game, playerId) > 0
+      );
+    default:
+      return false;
+  }
+}
+
+/** Everyone the game is currently waiting on. */
+export function playersActingNow(game: Game): string[] {
+  return game.players
+    .filter((player) => canPlayerActNow(game, player.id))
+    .map((player) => player.id);
+}
+
 export function clearActiveTurnState(game: Game): Game {
   return {
     ...game,

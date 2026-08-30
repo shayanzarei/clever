@@ -77,6 +77,38 @@ export function chooseDieToSlot(
   });
 }
 
+/** Pool dice that `chooseDieToSlot` would sweep onto the silver tray. */
+export function trayedByChoice(
+  dice: readonly DieState[],
+  dieId: string,
+): string[] {
+  const chosen = getDie(dice, dieId);
+  if (!chosen) {
+    return [];
+  }
+  return dice
+    .filter(
+      (die) =>
+        die.id !== dieId &&
+        die.location === "pool" &&
+        die.value < chosen.value,
+    )
+    .map((die) => die.id);
+}
+
+/** Reverse `chooseDieToSlot`: the slotted die and its sweep return to the pool. */
+export function returnDieToPool(
+  dice: readonly DieState[],
+  dieId: string,
+  trayedDieIds: readonly string[],
+): DieState[] {
+  return dice.map((die) =>
+    die.id === dieId || trayedDieIds.includes(die.id)
+      ? { ...die, location: "pool" as const, slotIndex: undefined }
+      : die,
+  );
+}
+
 export function moveRemainingPoolToTray(dice: readonly DieState[]): DieState[] {
   return dice.map((die) =>
     die.location === "pool"

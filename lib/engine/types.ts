@@ -137,6 +137,8 @@ export type AwaitingCross = {
   slotIndex?: number;
   /** Die selected for an extra-die cross. */
   extraDieId?: string;
+  /** Pool dice swept to the tray by this choice, so it can be undone. */
+  trayedDieIds?: readonly string[];
 };
 
 /** Bonus triggered by filling a box or completing a line. */
@@ -183,6 +185,8 @@ export type Action =
       targetIndex?: number;
     }
   | { type: "PASSIVE_TAKE"; playerId: string; dieId: string }
+  /** Take back a die selection that has not been marked on the sheet yet. */
+  | { type: "UNDO_DIE_CHOICE"; playerId: string }
   | {
       type: "USE_REROLL";
       playerId: string;

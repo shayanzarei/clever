@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { mayUseActiveSlotFallback } from "@/lib/engine/passive";
-import { isActivePlayer, activePlayerId } from "@/lib/engine/turn";
+import {
+  activePlayerId,
+  canPlayerActNow,
+  isActivePlayer,
+} from "@/lib/engine/turn";
 import type { Action, DieState, Game } from "@/lib/engine/types";
 import type { PlayerSeatId } from "@/lib/game/player-seats";
 import {
@@ -41,8 +45,8 @@ export function GameBoard({
   const [plusOneMode, setPlusOneMode] = useState(false);
   const [extraDieMode, setExtraDieMode] = useState(false);
 
-  const actingPlayerId = resolveActingPlayerId(game);
-  const canAct = !myPlayerId || actingPlayerId === myPlayerId;
+  const actingPlayerId = myPlayerId ?? resolveActingPlayerId(game);
+  const canAct = Boolean(actingPlayerId && canPlayerActNow(game, actingPlayerId));
 
   const crossOptions = useMemo(() => {
     if (!actingPlayerId || !canAct) {
@@ -110,14 +114,6 @@ export function GameBoard({
       <div className="game-board__hud">
         <GameHeader game={game} />
 
-        {myPlayerId && !canAct && game.phase !== "finished" && (
-          <p className="game-board__notice rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-600">
-            Waiting for{" "}
-            {game.players.find((player) => player.id === actingPlayerId)?.name ?? "opponent"}
-            …
-          </p>
-        )}
-
         {syncing && <p className="game-board__notice text-sm text-zinc-500">Syncing…</p>}
 
         {error && (
@@ -143,6 +139,9 @@ export function GameBoard({
             }
             onSkipExtra={(playerId) =>
               dispatch({ type: "SKIP_EXTRA_DIE", playerId })
+            }
+            onUndoChoice={(playerId) =>
+              dispatch({ type: "UNDO_DIE_CHOICE", playerId })
             }
             onRoundBonus={(playerId, choice) =>
               dispatch({ type: "CHOOSE_ROUND_BONUS", playerId, choice })
