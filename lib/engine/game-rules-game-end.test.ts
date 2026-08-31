@@ -167,23 +167,33 @@ describe("rule: winner and tie-breaking", () => {
       green: number;
       orange: number;
       purple: number;
-      foxes?: number;
+      foxScore?: number;
+      foxCount?: number;
     },
   ) {
-    const foxes = colors.foxes ?? 0;
-    const { foxes: _foxes, ...areaColors } = colors;
+    const foxScore = colors.foxScore ?? 0;
+    const foxCount = colors.foxCount ?? 0;
+    const areaColors = {
+      yellow: colors.yellow,
+      blue: colors.blue,
+      green: colors.green,
+      orange: colors.orange,
+      purple: colors.purple,
+    };
     const total =
       areaColors.yellow +
       areaColors.blue +
       areaColors.green +
       areaColors.orange +
       areaColors.purple +
-      foxes;
+      foxScore;
     return {
       id,
       name,
       total,
-      colors: { ...areaColors, foxes },
+      colors: areaColors,
+      foxCount,
+      foxScore,
     };
   }
 
@@ -209,8 +219,8 @@ describe("rule: winner and tie-breaking", () => {
 
   it("shares victory when totals and all color scores match", () => {
     const results = rankFinishedPlayers([
-      player("p1", "Alice", { yellow: 10, blue: 7, green: 6, orange: 5, purple: 4, foxes: 2 }),
-      player("p2", "Bob", { yellow: 10, blue: 7, green: 6, orange: 5, purple: 4, foxes: 2 }),
+      player("p1", "Alice", { yellow: 10, blue: 7, green: 6, orange: 5, purple: 4, foxScore: 2 }),
+      player("p2", "Bob", { yellow: 10, blue: 7, green: 6, orange: 5, purple: 4, foxScore: 2 }),
     ]);
 
     expect(winnerNames(results)).toEqual(["Alice", "Bob"]);
@@ -227,13 +237,17 @@ describe("rule: winner and tie-breaking", () => {
         id: "p1",
         name: "Alice",
         total: scoreSheet(aliceSheet),
-        colors: { ...colorScores(aliceSheet), foxes: scoreFoxes(aliceSheet) },
+        colors: colorScores(aliceSheet),
+        foxCount: aliceSheet.foxes,
+        foxScore: scoreFoxes(aliceSheet),
       },
       {
         id: "p2",
         name: "Bob",
         total: scoreSheet(bobSheet),
-        colors: { ...colorScores(bobSheet), foxes: scoreFoxes(bobSheet) },
+        colors: colorScores(bobSheet),
+        foxCount: bobSheet.foxes,
+        foxScore: scoreFoxes(bobSheet),
       },
     ]);
 

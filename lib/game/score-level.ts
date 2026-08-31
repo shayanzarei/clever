@@ -52,7 +52,9 @@ export type FinishedPlayerResult = {
   name: string;
   total: number;
   level: ScoreLevel;
-  colors: ColorScoreBreakdown & { foxes: number };
+  colors: ColorScoreBreakdown;
+  foxCount: number;
+  foxScore: number;
   rank: number;
 };
 
@@ -97,7 +99,9 @@ export function rankFinishedPlayers(
     id: string;
     name: string;
     total: number;
-    colors: ColorScoreBreakdown & { foxes: number };
+    colors: ColorScoreBreakdown;
+    foxCount: number;
+    foxScore: number;
   }[],
 ): FinishedPlayerResult[] {
   const sorted = [...players].sort(compareFinishedPlayers);

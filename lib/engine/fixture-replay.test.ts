@@ -59,7 +59,9 @@ describe("golden-master fixture replay", () => {
         id: player.id,
         name: player.name,
         total: scoreSheet(player.sheet),
-        colors: { ...colorScores(player.sheet), foxes: player.sheet.foxes },
+        colors: colorScores(player.sheet),
+        foxCount: player.sheet.foxes,
+        foxScore: scoreFoxes(player.sheet),
       })),
     );
 

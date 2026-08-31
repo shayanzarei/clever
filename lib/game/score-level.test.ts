@@ -43,14 +43,14 @@ describe("rankFinishedPlayers", () => {
     green: 6,
     orange: 5,
     purple: 4,
-    foxes: 0,
   };
+  const foxes = { foxCount: 0, foxScore: 0 };
 
   it("orders by score and assigns shared ranks", () => {
     const results = rankFinishedPlayers([
-      { id: "p2", name: "Bob", total: 200, colors },
-      { id: "p1", name: "Alice", total: 220, colors },
-      { id: "p3", name: "Cara", total: 200, colors: { ...colors, yellow: 8 } },
+      { id: "p2", name: "Bob", total: 200, colors, ...foxes },
+      { id: "p1", name: "Alice", total: 220, colors, ...foxes },
+      { id: "p3", name: "Cara", total: 200, colors: { ...colors, yellow: 8 }, ...foxes },
     ]);
 
     expect(results.map((entry) => entry.name)).toEqual(["Alice", "Bob", "Cara"]);
@@ -66,13 +66,17 @@ describe("rankFinishedPlayers", () => {
         id: "p1",
         name: "Alice",
         total: 65,
-        colors: { yellow: 10, blue: 0, green: 0, orange: 0, purple: 55, foxes: 0 },
+        colors: { yellow: 10, blue: 0, green: 0, orange: 0, purple: 55 },
+        foxCount: 0,
+        foxScore: 0,
       },
       {
         id: "p2",
         name: "Bob",
         total: 65,
-        colors: { yellow: 40, blue: 25, green: 0, orange: 0, purple: 0, foxes: 0 },
+        colors: { yellow: 40, blue: 25, green: 0, orange: 0, purple: 0 },
+        foxCount: 0,
+        foxScore: 0,
       },
     ]);
 
@@ -87,13 +91,17 @@ describe("rankFinishedPlayers", () => {
         id: "p1",
         name: "Alice",
         total: 65,
-        colors: { yellow: 50, blue: 15, green: 0, orange: 0, purple: 0, foxes: 0 },
+        colors: { yellow: 50, blue: 15, green: 0, orange: 0, purple: 0 },
+        foxCount: 0,
+        foxScore: 0,
       },
       {
         id: "p2",
         name: "Bob",
         total: 65,
-        colors: { yellow: 10, blue: 50, green: 5, orange: 0, purple: 0, foxes: 0 },
+        colors: { yellow: 10, blue: 50, green: 5, orange: 0, purple: 0 },
+        foxCount: 0,
+        foxScore: 0,
       },
     ]);
 
@@ -108,19 +116,25 @@ describe("rankFinishedPlayers", () => {
         id: "p1",
         name: "Alice",
         total: 100,
-        colors: { yellow: 20, blue: 20, green: 20, orange: 50, purple: 10, foxes: 0 },
+        colors: { yellow: 20, blue: 20, green: 20, orange: 50, purple: 10 },
+        foxCount: 0,
+        foxScore: 0,
       },
       {
         id: "p2",
         name: "Bob",
         total: 100,
-        colors: { yellow: 40, blue: 20, green: 20, orange: 20, purple: 10, foxes: 0 },
+        colors: { yellow: 40, blue: 20, green: 20, orange: 20, purple: 10 },
+        foxCount: 0,
+        foxScore: 0,
       },
       {
         id: "p3",
         name: "Cara",
         total: 100,
-        colors: { yellow: 20, blue: 20, green: 20, orange: 20, purple: 45, foxes: 0 },
+        colors: { yellow: 20, blue: 20, green: 20, orange: 20, purple: 45 },
+        foxCount: 0,
+        foxScore: 0,
       },
     ]);
 

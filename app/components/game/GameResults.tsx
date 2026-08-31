@@ -93,18 +93,14 @@ export function GameResults({ game, myPlayerId = null, onLeave }: GameResultsPro
 }
 
 function buildResults(game: Game): FinishedPlayerResult[] {
-  const scored = game.players.map((player) => {
-    const colors = colorScores(player.sheet);
-    return {
-      id: player.id,
-      name: player.name,
-      total: scoreSheet(player.sheet),
-      colors: {
-        ...colors,
-        foxes: scoreFoxes(player.sheet),
-      },
-    };
-  });
+  const scored = game.players.map((player) => ({
+    id: player.id,
+    name: player.name,
+    total: scoreSheet(player.sheet),
+    colors: colorScores(player.sheet),
+    foxCount: player.sheet.foxes,
+    foxScore: scoreFoxes(player.sheet),
+  }));
 
   return rankFinishedPlayers(scored);
 }
@@ -164,7 +160,7 @@ function PlayerResultCard({
         <ColorScore label="Green" value={player.colors.green} tone="text-neon-green" />
         <ColorScore label="Orange" value={player.colors.orange} tone="text-neon-orange" />
         <ColorScore label="Purple" value={player.colors.purple} tone="text-neon-purple" />
-        <ColorScore label="Foxes" value={player.colors.foxes} tone="text-white" />
+        <FoxScore count={player.foxCount} points={player.foxScore} />
       </dl>
     </li>
   );
@@ -183,6 +179,18 @@ function ColorScore({
     <div className="rounded-xl border border-line/80 bg-ink/40 px-2 py-1.5 text-center">
       <dt className="text-[10px] tracking-wide text-muted uppercase">{label}</dt>
       <dd className={`mt-0.5 font-bold tabular-nums ${tone}`}>{value}</dd>
+    </div>
+  );
+}
+
+function FoxScore({ count, points }: { count: number; points: number }) {
+  return (
+    <div className="rounded-xl border border-line/80 bg-ink/40 px-2 py-1.5 text-center">
+      <dt className="text-[10px] tracking-wide text-muted uppercase">Foxes</dt>
+      <dd className="mt-0.5 font-bold tabular-nums text-white">{count}</dd>
+      {points > 0 && (
+        <p className="mt-0.5 text-[10px] tabular-nums text-muted">+{points} pts</p>
+      )}
     </div>
   );
 }
