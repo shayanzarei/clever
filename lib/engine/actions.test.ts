@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { trayDice } from "./dice";
 import { activePlayerId } from "./turn";
-import { reduce } from "./reduce";
+import { reduceWithInvariants as reduce, sheetWithLegacyExtraDice, sheetWithPlusOnes, sheetWithRerolls } from "./test-reduce";
 import { beginRoundFourBonus } from "./round-start";
+import { beginRound } from "./turn";
 import type { DieFace, Game } from "./types";
 
 const FULL_ROLL: DieFace[] = [
@@ -94,10 +95,10 @@ function completeActiveTurn(
 }
 
 describe("round-start bonuses", () => {
-  it("grants +1 action to all players at round 1", () => {
+  it("grants a reroll action to all players at round 1", () => {
     const game = startGame();
-    expect(game.players.every((player) => player.sheet.plusOnes === 1)).toBe(true);
-    expect(game.players.every((player) => player.sheet.rerolls === 0)).toBe(true);
+    expect(game.players.every((player) => player.sheet.rerolls === 1)).toBe(true);
+    expect(game.players.every((player) => player.sheet.plusOnes === 0)).toBe(true);
   });
 
   it("lets the active player take the silver bonus then play", () => {
@@ -230,6 +231,17 @@ describe("round-start bonuses", () => {
     expect(game.phase).toBe("round_bonus_choose");
     expect(game.roundBonusPendingPlayerIds).toEqual(["p2"]);
   });
+
+  it("does not offer silver bonus on rounds 5 or 6", () => {
+    const base = startGame();
+    const roundFive = beginRound({ ...base, round: 5 });
+    expect(roundFive.phase).toBe("active_roll");
+    expect(roundFive.roundBonusPendingPlayerIds).toEqual([]);
+
+    const roundSix = beginRound({ ...base, round: 6 });
+    expect(roundSix.phase).toBe("active_roll");
+    expect(roundSix.roundBonusPendingPlayerIds).toEqual([]);
+  });
 });
 
 describe("sheet actions", () => {
@@ -239,7 +251,7 @@ describe("sheet actions", () => {
       ...game,
       players: game.players.map((player, index) =>
         index === 0
-          ? { ...player, sheet: { ...player.sheet, rerolls: 1 } }
+          ? { ...player, sheet: sheetWithRerolls(player.sheet, 1) }
           : player,
       ),
     };
@@ -263,6 +275,14 @@ describe("sheet actions", () => {
 
   it("USE_PLUS_ONE after the main turn scores an extra mark", () => {
     let game = startGame();
+    game = {
+      ...game,
+      players: game.players.map((player, index) =>
+        index === 0
+          ? { ...player, sheet: sheetWithPlusOnes(player.sheet, 1) }
+          : player,
+      ),
+    };
     game = completeActiveTurn(game, { skipPlusOne: false });
     expect(game.phase).toBe("active_extra");
 
@@ -287,7 +307,7 @@ describe("sheet actions", () => {
       ...game,
       players: game.players.map((player, index) =>
         index === 0
-          ? { ...player, sheet: { ...player.sheet, extraDice: 1, plusOnes: 0 } }
+          ? { ...player, sheet: sheetWithLegacyExtraDice(player.sheet, 1) }
           : player,
       ),
     };
@@ -314,7 +334,7 @@ describe("sheet actions", () => {
       ...game,
       players: game.players.map((player, index) =>
         index === 0
-          ? { ...player, sheet: { ...player.sheet, extraDice: 2, plusOnes: 0 } }
+          ? { ...player, sheet: sheetWithLegacyExtraDice(player.sheet, 2) }
           : player,
       ),
     };
@@ -339,7 +359,7 @@ describe("sheet actions", () => {
       ...game,
       players: game.players.map((player, index) =>
         index === 1
-          ? { ...player, sheet: { ...player.sheet, extraDice: 1, plusOnes: 0 } }
+          ? { ...player, sheet: sheetWithLegacyExtraDice(player.sheet, 1) }
           : player,
       ),
     };

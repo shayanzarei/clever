@@ -4,11 +4,14 @@ import {
   GREEN_SCORES,
   YELLOW_COLUMN_SCORES,
 } from "./constants";
+import { applyGreenCross, applyYellowCross } from "./apply";
+import { processAutoChain } from "./effects";
 import { createEmptySheet } from "./sheet";
 import {
   colorScores,
   scoreBlue,
   scoreFoxes,
+  scoreFoxesFromAreas,
   scoreGreen,
   scoreOrange,
   scorePurple,
@@ -93,6 +96,25 @@ describe("scoreYellow", () => {
   it("ignores partial columns", () => {
     const sheet = crossYellow(createEmptySheet(), 0);
     expect(scoreYellow(sheet)).toBe(0);
+  });
+
+  it("scores 60 when all 12 numbered cells are marked", () => {
+    let sheet = createEmptySheet();
+    sheet.yellow.grid.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (!cell.crossed && !cell.preprinted) {
+          sheet = applyYellowCross(
+            sheet,
+            rowIndex * row.length + colIndex,
+          ).sheet;
+        }
+      });
+    });
+
+    expect(scoreYellow(sheet)).toBe(60);
+    expect(YELLOW_COLUMN_SCORES.reduce((sum, points) => sum + points, 0)).toBe(
+      60,
+    );
   });
 });
 
@@ -191,5 +213,53 @@ describe("scoreFoxes", () => {
     sheet = { ...sheet, foxes: 2 };
     expect(scoreFoxes(sheet)).toBe(10);
     expect(Math.min(...Object.values(colorScores(sheet)))).toBe(5);
+    expect(scoreFoxes(sheet)).toBe(
+      scoreFoxesFromAreas(sheet.foxes, colorScores(sheet)),
+    );
+  });
+
+  it.each([
+    [
+      3,
+      { yellow: 20, blue: 20, green: 20, orange: 20, purple: 20 },
+      60,
+    ],
+    [
+      3,
+      { yellow: 20, blue: 20, green: 0, orange: 20, purple: 20 },
+      0,
+    ],
+    [
+      0,
+      { yellow: 20, blue: 20, green: 20, orange: 20, purple: 20 },
+      0,
+    ],
+    [
+      2,
+      { yellow: 10, blue: 40, green: 40, orange: 40, purple: 40 },
+      20,
+    ],
+  ] as const)(
+    "rulebook table: %i foxes, areas %i/%i/%i/%i/%i → %i",
+    (foxCount, areas, expected) => {
+      expect(scoreFoxesFromAreas(foxCount, areas)).toBe(expected);
+    },
+  );
+});
+
+describe("cross_green_bonus", () => {
+  it("fills the next green box even when its threshold is 6", () => {
+    let sheet = createEmptySheet();
+    for (let index = 0; index < 10; index += 1) {
+      sheet = applyGreenCross(sheet, index).sheet;
+    }
+    expect(sheet.green.boxes[10]?.crossed).toBe(false);
+    expect(sheet.green.boxes[10]?.threshold).toBe(6);
+
+    const result = processAutoChain(sheet, [{ type: "cross_green_bonus" }]);
+
+    expect(result.pending).toEqual([]);
+    expect(result.sheet.green.boxes[10]?.crossed).toBe(true);
+    expect(result.sheet.green.boxes[9]?.crossed).toBe(true);
   });
 });

@@ -1,7 +1,7 @@
 import { resolveBlueWhiteValues } from "@/lib/engine/blue";
+import { getChoiceTargets } from "@/lib/engine/choice-targets";
 import { getDie } from "@/lib/engine/dice";
 import { getCrossTargets } from "@/lib/engine/legality";
-import { nextGreenIndex } from "@/lib/engine/sheet";
 import type {
   Action,
   ColorArea,
@@ -28,57 +28,11 @@ function pendingCrossOptions(
     return [];
   }
 
-  const options: SheetCrossOption[] = [];
-
-  if (head.type === "cross_yellow_free" || head.type === "round_black_x") {
-    sheet.yellow.grid.forEach((row, rowIndex) => {
-      row.forEach((cell, colIndex) => {
-        if (!cell.crossed) {
-          options.push({
-            color: "yellow",
-            value: cell.value,
-            targetIndex: rowIndex * row.length + colIndex,
-          });
-        }
-      });
-    });
-  }
-
-  if (head.type === "cross_blue_free" || head.type === "round_black_x") {
-    sheet.blue.boxes.forEach((box, index) => {
-      if (!box.crossed) {
-        options.push({
-          color: "blue",
-          value: box.sum,
-          targetIndex: index,
-        });
-      }
-    });
-  }
-
-  if (head.type === "round_black_x") {
-    const next = nextGreenIndex(sheet);
-    if (next !== null) {
-      options.push({
-        color: "green",
-        value: sheet.green.boxes[next].threshold,
-        targetIndex: next,
-      });
-    }
-  }
-
-  if (head.type === "round_black_six") {
-    const purpleNext = sheet.purple.boxes.findIndex((box) => box.value === null);
-    if (purpleNext >= 0) {
-      options.push({ color: "purple", value: 6, targetIndex: purpleNext });
-    }
-    const orangeNext = sheet.orange.boxes.findIndex((box) => box.value === null);
-    if (orangeNext >= 0) {
-      options.push({ color: "orange", value: 6, targetIndex: orangeNext });
-    }
-  }
-
-  return options;
+  return getChoiceTargets(sheet, head).map((target) => ({
+    color: target.color,
+    value: target.value,
+    targetIndex: target.targetIndex,
+  }));
 }
 
 function chosenDieCrossOptions(

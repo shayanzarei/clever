@@ -1,16 +1,16 @@
-import { grantExtraDie, grantPlusOne, grantReroll } from "./sheet-actions";
+import { grantPlusOne, grantReroll } from "./sheet-actions";
 import type { Effect, Game, Player, RoundBonusChoice } from "./types";
 
 /** Round-tracker grants for rounds 1–3 (official sheet). */
 export const ROUND_START_ACTIONS: Readonly<
-  Record<1 | 2 | 3, "plus_one" | "reroll" | "extra_die">
+  Record<1 | 2 | 3, "plus_one" | "reroll">
 > = {
-  1: "plus_one",
-  2: "reroll",
-  3: "extra_die",
+  1: "reroll",
+  2: "plus_one",
+  3: "reroll",
 };
 
-function applyActionGrant(player: Player, grant: "plus_one" | "reroll" | "extra_die"): Player {
+function applyActionGrant(player: Player, grant: "plus_one" | "reroll"): Player {
   let sheet = player.sheet;
   switch (grant) {
     case "plus_one":
@@ -18,9 +18,6 @@ function applyActionGrant(player: Player, grant: "plus_one" | "reroll" | "extra_
       break;
     case "reroll":
       sheet = grantReroll(sheet);
-      break;
-    case "extra_die":
-      sheet = grantExtraDie(sheet);
       break;
   }
   return { ...player, sheet };
@@ -40,7 +37,7 @@ export function applyRoundStartActions(game: Game, round: number): Game {
 }
 
 export function isSilverBonusRound(round: number): boolean {
-  return round >= 4;
+  return round === 4;
 }
 
 /** Active player picks silver X or 6, then plays their turn. */

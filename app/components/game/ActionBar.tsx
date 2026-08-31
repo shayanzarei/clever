@@ -1,5 +1,6 @@
 import { resolveBlueWhiteValues } from "@/lib/engine/blue";
 import { poolDice } from "@/lib/engine/dice";
+import { canSkipActiveRoll } from "@/lib/engine/passive";
 import {
   activePlayerId,
   canPlayerActNow,
@@ -19,6 +20,7 @@ type ActionBarProps = {
   onRoll: () => void;
   onReroll: () => void;
   onSkipExtra: (playerId: string) => void;
+  onSkipRoll: (playerId: string) => void;
   onUndoChoice: (playerId: string) => void;
   onRoundBonus: (playerId: string, choice: "black_x" | "black_six") => void;
   extraDieMode: boolean;
@@ -31,6 +33,7 @@ export function ActionBar({
   onRoll,
   onReroll,
   onSkipExtra,
+  onSkipRoll,
   onUndoChoice,
   onRoundBonus,
   extraDieMode,
@@ -67,6 +70,21 @@ export function ActionBar({
         active.sheet.rerolls > 0 && (
           <button type="button" className="hud-btn" onClick={onReroll}>
             Reroll ×{active.sheet.rerolls}
+          </button>
+        )}
+
+      {game.phase === "active_choose" &&
+        canAct &&
+        viewingPlayerId &&
+        isActivePlayer(game, viewingPlayerId) &&
+        !game.awaitingCross &&
+        canSkipActiveRoll(game, viewingPlayerId) && (
+          <button
+            type="button"
+            className="hud-btn"
+            onClick={() => onSkipRoll(viewingPlayerId)}
+          >
+            Pass roll
           </button>
         )}
 

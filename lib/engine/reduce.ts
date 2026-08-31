@@ -7,6 +7,10 @@ import {
   applyYellowCross,
 } from "./apply";
 import { crossEffectMatchesPending, effectNeedsChoice } from "./bonuses";
+import {
+  isValidChoiceTarget,
+  type ChoiceTarget,
+} from "./choice-targets";
 import { validateSheetCross } from "./cross-validation";
 import {
   applyChoiceBlue,
@@ -24,7 +28,7 @@ import {
   returnDieToPool,
   trayedByChoice,
 } from "./dice";
-import { validatePassiveTake } from "./passive";
+import { poolDiceHasLegalCross, validatePassiveTake } from "./passive";
 import {
   beginRoundFourBonus,
   roundBonusEffect,
@@ -527,6 +531,32 @@ function useExtraDie(
   });
 }
 
+function skipRoll(
+  game: Game,
+  action: Extract<Action, { type: "SKIP_ROLL" }>,
+): Game {
+  if (!isActivePlayer(game, action.playerId)) {
+    throw new Error("Only the active player may skip a roll");
+  }
+  if (game.phase !== "active_choose") {
+    throw new Error("SKIP_ROLL is only allowed during active_choose");
+  }
+  if (game.awaitingCross) {
+    throw new Error("Must complete cross before skipping roll");
+  }
+  if (game.pending.length > 0) {
+    throw new Error("Cannot skip roll while effects are pending");
+  }
+  if (poolDice(game.dice).length === 0) {
+    throw new Error("No pool dice to skip");
+  }
+  if (poolDiceHasLegalCross(game, action.playerId)) {
+    throw new Error("At least one pool die can still be marked");
+  }
+
+  return finishActiveChoice(game, action.playerId);
+}
+
 function skipExtraDie(
   game: Game,
   action: Extract<Action, { type: "SKIP_EXTRA_DIE" }>,
@@ -611,6 +641,12 @@ function crossDuringPending(
   const player = getPlayer(game, action.playerId);
   let result;
 
+  const rejectIllegalChoice = (target: ChoiceTarget) => {
+    if (!isValidChoiceTarget(player.sheet, head, target)) {
+      throw new Error("Illegal pending cross");
+    }
+  };
+
   switch (action.color) {
     case "yellow": {
       const targetIndex =
@@ -627,6 +663,11 @@ function crossDuringPending(
       if (targetIndex === undefined) {
         throw new Error("Yellow target required");
       }
+      rejectIllegalChoice({
+        color: "yellow",
+        targetIndex,
+        value: action.value,
+      });
       result = applyChoiceYellow(
         player.sheet,
         action.value as DieValue,
@@ -637,9 +678,18 @@ function crossDuringPending(
     case "blue": {
       if (head.type === "cross_blue_free" || head.type === "round_black_x") {
         const index = action.targetIndex;
-        if (index === undefined || player.sheet.blue.boxes[index]?.crossed) {
+        if (index === undefined) {
           throw new Error("Blue target required");
         }
+        const box = player.sheet.blue.boxes[index];
+        if (!box) {
+          throw new Error("Blue target required");
+        }
+        rejectIllegalChoice({
+          color: "blue",
+          targetIndex: index,
+          value: box.sum,
+        });
         result = applyBlueCross(player.sheet, index);
         break;
       }
@@ -655,10 +705,21 @@ function crossDuringPending(
       break;
     }
     case "green": {
-      const index = player.sheet.green.boxes.findIndex((box) => !box.crossed);
+      const index =
+        action.targetIndex ??
+        player.sheet.green.boxes.findIndex((box) => !box.crossed);
       if (index < 0) {
         throw new Error("No green box available");
       }
+      const threshold = player.sheet.green.boxes[index]?.threshold;
+      if (threshold === undefined) {
+        throw new Error("No green box available");
+      }
+      rejectIllegalChoice({
+        color: "green",
+        targetIndex: index,
+        value: threshold,
+      });
       result = applyGreenCross(player.sheet, index);
       break;
     }
@@ -666,9 +727,17 @@ function crossDuringPending(
       if (action.value !== 6) {
         throw new Error("Round 6-bonus requires value 6 in orange");
       }
-      const index = player.sheet.orange.boxes.findIndex(
-        (box) => box.value === null,
-      );
+      const index =
+        action.targetIndex ??
+        player.sheet.orange.boxes.findIndex((box) => box.value === null);
+      if (index < 0) {
+        throw new Error("Illegal pending cross");
+      }
+      rejectIllegalChoice({
+        color: "orange",
+        targetIndex: index,
+        value: 6,
+      });
       result = applyOrangeFill(player.sheet, index, 6);
       break;
     }
@@ -676,9 +745,17 @@ function crossDuringPending(
       if (action.value !== 6) {
         throw new Error("Round 6-bonus requires value 6 in purple");
       }
-      const index = player.sheet.purple.boxes.findIndex(
-        (box) => box.value === null,
-      );
+      const index =
+        action.targetIndex ??
+        player.sheet.purple.boxes.findIndex((box) => box.value === null);
+      if (index < 0) {
+        throw new Error("Illegal pending cross");
+      }
+      rejectIllegalChoice({
+        color: "purple",
+        targetIndex: index,
+        value: 6,
+      });
       result = applyPurpleFill(player.sheet, index, 6);
       break;
     }
@@ -843,6 +920,8 @@ export function reduce(state: Game, action: Action): Game {
       return useExtraDie(game, action);
     case "SKIP_EXTRA_DIE":
       return skipExtraDie(game, action);
+    case "SKIP_ROLL":
+      return skipRoll(game, action);
     case "CHOOSE_ROUND_BONUS":
       return chooseRoundBonus(game, action);
     case "CROSS": {

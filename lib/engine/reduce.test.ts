@@ -7,7 +7,7 @@ import {
 } from "./apply";
 import { resetDiceToPool } from "./dice";
 import { createEmptySheet } from "./sheet";
-import { reduce } from "./reduce";
+import { reduceWithInvariants as reduce } from "./test-reduce";
 import type { Action, DieFace, DieValue, Game } from "./types";
 
 type CrossAction = Extract<Action, { type: "CROSS" }>;
@@ -371,7 +371,7 @@ describe("reduce bonus chains", () => {
       targetIndex: 15,
     });
 
-    expect(game.players[0].sheet.plusOnes).toBe(2);
+    expect(game.players[0].sheet.plusOnes).toBe(1);
     expect(game.players[0].sheet.claims.yellowDiagonal).toBe(true);
   });
 

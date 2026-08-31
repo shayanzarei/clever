@@ -42,7 +42,9 @@ export function createEmptySheet(): Sheet {
     },
     foxes: 0,
     plusOnes: 0,
+    plusOnesEarned: 0,
     rerolls: 0,
+    rerollsEarned: 0,
     extraDice: 0,
     claims: {
       yellowRows: [false, false, false, false],

@@ -64,8 +64,12 @@ export type Sheet = {
   foxes: number;
   /** Uncrossed +1 extra-mark actions remaining. */
   plusOnes: number;
+  /** Total +1 actions ever granted, including legacy extraDice (pad track; never decremented). */
+  plusOnesEarned: number;
   /** Uncrossed reroll actions remaining. */
   rerolls: number;
+  /** Total reroll actions ever granted (pad track; never decremented). */
+  rerollsEarned: number;
   /** Legacy extra-die count; still spent as +1. */
   extraDice: number;
   /** One-shot line bonuses already collected. */
@@ -205,6 +209,8 @@ export type Action =
       dieId: string;
     }
   | { type: "SKIP_EXTRA_DIE"; playerId: string }
+  /** Active player passes a roll when no pool die can be marked (still counts as 1 of 3). */
+  | { type: "SKIP_ROLL"; playerId: string }
   | {
       type: "CHOOSE_ROUND_BONUS";
       playerId: string;

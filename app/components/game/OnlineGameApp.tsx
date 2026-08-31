@@ -93,6 +93,7 @@ export function OnlineGameApp({ code }: OnlineGameAppProps) {
         clearError={clearError}
         myPlayerId={playerId}
         syncing={syncing}
+        onLeave={() => router.push("/")}
       />
     </div>
   );

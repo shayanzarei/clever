@@ -17,6 +17,7 @@ import {
   nextOrangeIndex,
   nextPurpleIndex,
 } from "./sheet";
+import { grantPlusOne, grantReroll } from "./sheet-actions";
 import type { DieValue, Effect, Sheet } from "./types";
 
 export type ApplyEvent =
@@ -326,9 +327,9 @@ export function applyPassiveBonus(sheet: Sheet, effect: Effect): Sheet | null {
     case "fox":
       return { ...sheet, foxes: sheet.foxes + 1 };
     case "reroll":
-      return { ...sheet, rerolls: sheet.rerolls + 1 };
+      return grantReroll(sheet);
     case "plus_one":
-      return { ...sheet, plusOnes: sheet.plusOnes + 1 };
+      return grantPlusOne(sheet);
     default:
       return null;
   }

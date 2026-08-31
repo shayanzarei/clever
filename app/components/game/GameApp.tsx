@@ -56,6 +56,7 @@ export function GameApp({ onLeave }: { onLeave?: () => void }) {
         dispatch={dispatch}
         roll={roll}
         clearError={clearError}
+        onLeave={onLeave}
       />
     </div>
   );

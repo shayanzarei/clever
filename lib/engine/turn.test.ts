@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { poolDice, trayDice } from "./dice";
 import { activePlayerId, canPlayerActNow, playersActingNow } from "./turn";
-import { reduce } from "./reduce";
+import { reduceWithInvariants as reduce } from "./test-reduce";
 import type { Action, ColorArea, DieFace, DieValue, Game } from "./types";
 
 type CrossInput = {

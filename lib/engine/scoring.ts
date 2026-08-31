@@ -10,6 +10,37 @@ import {
 } from "./sheet";
 import type { Sheet } from "./types";
 
+export type AreaScores = {
+  yellow: number;
+  blue: number;
+  green: number;
+  orange: number;
+  purple: number;
+};
+
+/** Pure fox arithmetic from area scores (rulebook table). */
+export function scoreFoxesFromAreas(
+  foxCount: number,
+  areas: AreaScores,
+): number {
+  if (foxCount === 0) {
+    return 0;
+  }
+
+  const floor = Math.min(
+    areas.yellow,
+    areas.blue,
+    areas.green,
+    areas.orange,
+    areas.purple,
+  );
+  if (floor === 0) {
+    return 0;
+  }
+
+  return foxCount * floor;
+}
+
 /** Sum of column scores for every fully crossed yellow column. */
 export function scoreYellow(sheet: Sheet): number {
   let total = 0;
@@ -57,24 +88,7 @@ export function scorePurple(sheet: Sheet): number {
  * If any color scores 0, every fox is worth 0.
  */
 export function scoreFoxes(sheet: Sheet): number {
-  if (sheet.foxes === 0) {
-    return 0;
-  }
-
-  const colorScores = [
-    scoreYellow(sheet),
-    scoreBlue(sheet),
-    scoreGreen(sheet),
-    scoreOrange(sheet),
-    scorePurple(sheet),
-  ];
-
-  const floor = Math.min(...colorScores);
-  if (floor === 0) {
-    return 0;
-  }
-
-  return sheet.foxes * floor;
+  return scoreFoxesFromAreas(sheet.foxes, colorScores(sheet));
 }
 
 export function scoreSheet(sheet: Sheet): number {

@@ -1,0 +1,2498 @@
+{
+ "seed": 20260831,
+ "players": 4,
+ "rounds": 4,
+ "transcript": [
+  {
+   "event": "roundStart",
+   "round": 1,
+   "bonusApplied": [
+    {
+     "player": 0,
+     "bonus": "reroll"
+    },
+    {
+     "player": 1,
+     "bonus": "reroll"
+    },
+    {
+     "player": 2,
+     "bonus": "reroll"
+    },
+    {
+     "player": 3,
+     "bonus": "reroll"
+    }
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 1,
+   "activePlayer": 0,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 5,
+      "blue": 1,
+      "green": 6,
+      "orange": 3,
+      "purple": 4,
+      "white": 5
+     },
+     "chosen": {
+      "color": "yellow",
+      "value": 5
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       0,
+       2
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "green": 3,
+      "white": 4
+     },
+     "chosen": {
+      "color": "white",
+      "value": 4
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       3
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "blue": 1,
+    "orange": 3,
+    "purple": 4,
+    "green": 3
+   },
+   "passive": [
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "purple",
+      "value": 4
+     },
+     "placed": {
+      "area": "purple",
+      "detail": 4
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "purple",
+      "value": 4
+     },
+     "placed": {
+      "area": "purple",
+      "detail": 4
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "purple",
+      "value": 4
+     },
+     "placed": {
+      "area": "purple",
+      "detail": 4
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 5,
+    "blue": 1,
+    "green": 6,
+    "orange": 3,
+    "purple": 4,
+    "white": 5
+   },
+   "finalDieValues": {
+    "yellow": 5,
+    "blue": 1,
+    "green": 3,
+    "orange": 3,
+    "purple": 4,
+    "white": 4
+   },
+   "activeDiceFields": [
+    {
+     "color": "yellow",
+     "value": 5
+    },
+    {
+     "color": "white",
+     "value": 4
+    },
+    null
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 1,
+   "activePlayer": 1,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 6,
+      "blue": 1,
+      "green": 5,
+      "orange": 4,
+      "purple": 3,
+      "white": 4
+     },
+     "chosen": {
+      "color": "yellow",
+      "value": 6
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       0,
+       1
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "blue": 1,
+    "green": 5,
+    "orange": 4,
+    "purple": 3,
+    "white": 4
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 4
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       3,
+       2
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 4
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       3
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 4
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       3
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 6,
+    "blue": 1,
+    "green": 5,
+    "orange": 4,
+    "purple": 3,
+    "white": 4
+   },
+   "finalDieValues": {
+    "yellow": 6,
+    "blue": 1,
+    "green": 5,
+    "orange": 4,
+    "purple": 3,
+    "white": 4
+   },
+   "activeDiceFields": [
+    {
+     "color": "yellow",
+     "value": 6
+    },
+    null
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 1,
+   "activePlayer": 2,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 2,
+      "blue": 3,
+      "green": 2,
+      "orange": 3,
+      "purple": 4,
+      "white": 6
+     },
+     "chosen": {
+      "color": "white",
+      "value": 6
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 6
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "yellow": 2,
+    "blue": 3,
+    "green": 2,
+    "orange": 3,
+    "purple": 4
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 2
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       1,
+       0
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 2
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       1,
+       0
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 2
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       1,
+       0
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 2,
+    "blue": 3,
+    "green": 2,
+    "orange": 3,
+    "purple": 4,
+    "white": 6
+   },
+   "finalDieValues": {
+    "yellow": 2,
+    "blue": 3,
+    "green": 2,
+    "orange": 3,
+    "purple": 4,
+    "white": 6
+   },
+   "activeDiceFields": [
+    {
+     "color": "white",
+     "value": 6
+    },
+    null
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 1,
+   "activePlayer": 3,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 3,
+      "blue": 6,
+      "green": 6,
+      "orange": 6,
+      "purple": 4,
+      "white": 5
+     },
+     "chosen": {
+      "color": "orange",
+      "value": 6
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 6
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "blue": 1,
+      "green": 2
+     },
+     "chosen": {
+      "color": "blue",
+      "value": 1
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 6
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {
+      "green": 3
+     },
+     "chosen": {
+      "color": "green",
+      "value": 3
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    }
+   ],
+   "platter": {
+    "yellow": 3,
+    "purple": 4,
+    "white": 5
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 3
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       0,
+       0
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 3
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       0,
+       0
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 3
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       0,
+       0
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 3,
+    "blue": 6,
+    "green": 6,
+    "orange": 6,
+    "purple": 4,
+    "white": 5
+   },
+   "finalDieValues": {
+    "yellow": 3,
+    "blue": 1,
+    "green": 3,
+    "orange": 6,
+    "purple": 4,
+    "white": 5
+   },
+   "activeDiceFields": [
+    {
+     "color": "orange",
+     "value": 6
+    },
+    {
+     "color": "blue",
+     "value": 1
+    },
+    {
+     "color": "green",
+     "value": 3
+    }
+   ]
+  },
+  {
+   "event": "roundStart",
+   "round": 2,
+   "bonusApplied": [
+    {
+     "player": 0,
+     "bonus": "plusOne"
+    },
+    {
+     "player": 1,
+     "bonus": "plusOne"
+    },
+    {
+     "player": 2,
+     "bonus": "plusOne"
+    },
+    {
+     "player": 3,
+     "bonus": "plusOne"
+    }
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 2,
+   "activePlayer": 0,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 4,
+      "blue": 2,
+      "green": 5,
+      "orange": 3,
+      "purple": 2,
+      "white": 5
+     },
+     "chosen": {
+      "color": "white",
+      "value": 5
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       1,
+       3
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "green": 6
+     },
+     "chosen": {
+      "color": "green",
+      "value": 6
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "yellow": 4,
+    "blue": 2,
+    "orange": 3,
+    "purple": 2
+   },
+   "passive": [
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 4
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       3
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 4
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       3,
+       2
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 4
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       3,
+       2
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 4,
+    "blue": 2,
+    "green": 5,
+    "orange": 3,
+    "purple": 2,
+    "white": 5
+   },
+   "finalDieValues": {
+    "yellow": 4,
+    "blue": 2,
+    "green": 6,
+    "orange": 3,
+    "purple": 2,
+    "white": 5
+   },
+   "activeDiceFields": [
+    {
+     "color": "white",
+     "value": 5
+    },
+    {
+     "color": "green",
+     "value": 6
+    },
+    null
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 2,
+   "activePlayer": 1,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 4,
+      "blue": 6,
+      "green": 4,
+      "orange": 2,
+      "purple": 4,
+      "white": 2
+     },
+     "chosen": {
+      "color": "yellow",
+      "value": 4
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       3,
+       2
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "blue": 2,
+      "green": 4,
+      "purple": 5
+     },
+     "chosen": {
+      "color": "blue",
+      "value": 2
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 4
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {
+      "green": 3,
+      "purple": 5
+     },
+     "chosen": {
+      "color": "green",
+      "value": 3
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    }
+   ],
+   "platter": {
+    "orange": 2,
+    "white": 2,
+    "purple": 4
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       2
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       1,
+       0
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       2
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 4,
+    "blue": 6,
+    "green": 4,
+    "orange": 2,
+    "purple": 4,
+    "white": 2
+   },
+   "finalDieValues": {
+    "yellow": 4,
+    "blue": 2,
+    "green": 3,
+    "orange": 2,
+    "purple": 4,
+    "white": 2
+   },
+   "activeDiceFields": [
+    {
+     "color": "yellow",
+     "value": 4
+    },
+    {
+     "color": "blue",
+     "value": 2
+    },
+    {
+     "color": "green",
+     "value": 3
+    }
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 2,
+   "activePlayer": 2,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 4,
+      "blue": 2,
+      "green": 2,
+      "orange": 5,
+      "purple": 4,
+      "white": 6
+     },
+     "chosen": {
+      "color": "white",
+      "value": 6
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       0,
+       1
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "yellow": 4,
+    "blue": 2,
+    "green": 2,
+    "orange": 5,
+    "purple": 4
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 5
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 5
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 5
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 5
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 5
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 5
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 4,
+    "blue": 2,
+    "green": 2,
+    "orange": 5,
+    "purple": 4,
+    "white": 6
+   },
+   "finalDieValues": {
+    "yellow": 4,
+    "blue": 2,
+    "green": 2,
+    "orange": 5,
+    "purple": 4,
+    "white": 6
+   },
+   "activeDiceFields": [
+    {
+     "color": "white",
+     "value": 6
+    },
+    null
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 2,
+   "activePlayer": 3,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 1,
+      "blue": 3,
+      "green": 2,
+      "orange": 4,
+      "purple": 5,
+      "white": 4
+     },
+     "chosen": {
+      "color": "yellow",
+      "value": 1
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       0
+      ]
+     },
+     "bonusChoices": [
+      {
+       "effect": "greenX",
+       "target": 1
+      }
+     ]
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "blue": 6,
+      "green": 5,
+      "orange": 3,
+      "purple": 5,
+      "white": 2
+     },
+     "chosen": {
+      "color": "orange",
+      "value": 3
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 3
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {
+      "blue": 6,
+      "green": 3,
+      "purple": 6
+     },
+     "chosen": {
+      "color": "purple",
+      "value": 6
+     },
+     "placed": {
+      "area": "purple",
+      "detail": 6
+     },
+     "bonusChoices": []
+    }
+   ],
+   "platter": {
+    "white": 2,
+    "green": 3,
+    "blue": 3
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "purple",
+      "detail": 2
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       2
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       2
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 1,
+    "blue": 3,
+    "green": 2,
+    "orange": 4,
+    "purple": 5,
+    "white": 4
+   },
+   "finalDieValues": {
+    "yellow": 1,
+    "blue": 3,
+    "green": 3,
+    "orange": 3,
+    "purple": 6,
+    "white": 2
+   },
+   "activeDiceFields": [
+    {
+     "color": "yellow",
+     "value": 1
+    },
+    {
+     "color": "orange",
+     "value": 3
+    },
+    {
+     "color": "purple",
+     "value": 6
+    }
+   ]
+  },
+  {
+   "event": "roundStart",
+   "round": 3,
+   "bonusApplied": [
+    {
+     "player": 0,
+     "bonus": "reroll"
+    },
+    {
+     "player": 1,
+     "bonus": "reroll"
+    },
+    {
+     "player": 2,
+     "bonus": "reroll"
+    },
+    {
+     "player": 3,
+     "bonus": "reroll"
+    }
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 3,
+   "activePlayer": 0,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 2,
+      "blue": 6,
+      "green": 6,
+      "orange": 6,
+      "purple": 5,
+      "white": 1
+     },
+     "chosen": {
+      "color": "white",
+      "value": 1
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       1,
+       1
+      ]
+     },
+     "bonusChoices": [
+      {
+       "effect": "orange",
+       "value": 4,
+       "target": 1
+      }
+     ]
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "yellow": 1,
+      "blue": 6,
+      "green": 1,
+      "orange": 5,
+      "purple": 2
+     },
+     "chosen": {
+      "color": "orange",
+      "value": 5
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 5
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {
+      "blue": 4
+     },
+     "chosen": {
+      "color": "blue",
+      "value": 4
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 5
+     },
+     "bonusChoices": []
+    }
+   ],
+   "platter": {
+    "yellow": 1,
+    "green": 1,
+    "purple": 2
+   },
+   "passive": [
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 1
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       0
+      ]
+     },
+     "bonusChoices": [
+      {
+       "effect": "greenX",
+       "target": 1
+      }
+     ]
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 1
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       0
+      ]
+     },
+     "bonusChoices": [
+      {
+       "effect": "greenX",
+       "target": 0
+      }
+     ]
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 1
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       1,
+       1
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 2,
+    "blue": 6,
+    "green": 6,
+    "orange": 6,
+    "purple": 5,
+    "white": 1
+   },
+   "finalDieValues": {
+    "yellow": 1,
+    "blue": 4,
+    "green": 1,
+    "orange": 5,
+    "purple": 2,
+    "white": 1
+   },
+   "activeDiceFields": [
+    {
+     "color": "white",
+     "value": 1
+    },
+    {
+     "color": "orange",
+     "value": 5
+    },
+    {
+     "color": "blue",
+     "value": 4
+    }
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 3,
+   "activePlayer": 1,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 4,
+      "blue": 3,
+      "green": 4,
+      "orange": 1,
+      "purple": 3,
+      "white": 6
+     },
+     "chosen": {
+      "color": "blue",
+      "value": 3
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 9
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "yellow": 2,
+      "green": 1,
+      "purple": 3,
+      "white": 6
+     },
+     "chosen": {
+      "color": "white",
+      "value": 6
+     },
+     "placed": {
+      "area": "purple",
+      "detail": 6
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "orange": 1,
+    "yellow": 2,
+    "green": 1,
+    "purple": 3
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "purple",
+      "value": 3
+     },
+     "placed": {
+      "area": "purple",
+      "detail": 3
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 1
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 1
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 1
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 1
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 4,
+    "blue": 3,
+    "green": 4,
+    "orange": 1,
+    "purple": 3,
+    "white": 6
+   },
+   "finalDieValues": {
+    "yellow": 2,
+    "blue": 3,
+    "green": 1,
+    "orange": 1,
+    "purple": 3,
+    "white": 6
+   },
+   "activeDiceFields": [
+    {
+     "color": "blue",
+     "value": 3
+    },
+    {
+     "color": "white",
+     "value": 6
+    },
+    null
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 3,
+   "activePlayer": 2,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 3,
+      "blue": 2,
+      "green": 3,
+      "orange": 2,
+      "purple": 4,
+      "white": 3
+     },
+     "chosen": {
+      "color": "white",
+      "value": 3
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 3
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "yellow": 3,
+      "green": 4,
+      "purple": 2
+     },
+     "chosen": {
+      "color": "yellow",
+      "value": 3
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       3,
+       1
+      ]
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {
+      "green": 6
+     },
+     "chosen": {
+      "color": "green",
+      "value": 6
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    }
+   ],
+   "platter": {
+    "blue": 2,
+    "orange": 2,
+    "purple": 2
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 2
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 2
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "blue",
+      "value": 2
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 5
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 2
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 2
+     },
+     "bonusChoices": [
+      {
+       "effect": "yellowX",
+       "target": [
+        1,
+        3
+       ],
+       "cellValue": 5
+      },
+      {
+       "effect": "orange",
+       "value": 4,
+       "target": 5
+      }
+     ]
+    }
+   ],
+   "initialRoll": {
+    "yellow": 3,
+    "blue": 2,
+    "green": 3,
+    "orange": 2,
+    "purple": 4,
+    "white": 3
+   },
+   "finalDieValues": {
+    "yellow": 3,
+    "blue": 2,
+    "green": 6,
+    "orange": 2,
+    "purple": 2,
+    "white": 3
+   },
+   "activeDiceFields": [
+    {
+     "color": "white",
+     "value": 3
+    },
+    {
+     "color": "yellow",
+     "value": 3
+    },
+    {
+     "color": "green",
+     "value": 6
+    }
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 3,
+   "activePlayer": 3,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 1,
+      "blue": 2,
+      "green": 3,
+      "orange": 5,
+      "purple": 2,
+      "white": 1
+     },
+     "chosen": {
+      "color": "orange",
+      "value": 5
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 5
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "yellow": 1,
+    "blue": 2,
+    "green": 3,
+    "purple": 2,
+    "white": 1
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 1
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       2,
+       0
+      ]
+     },
+     "bonusChoices": [
+      {
+       "effect": "greenX",
+       "target": 1
+      }
+     ]
+    },
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "green",
+      "value": 3
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "blue",
+      "value": 2
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 3
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 1,
+    "blue": 2,
+    "green": 3,
+    "orange": 5,
+    "purple": 2,
+    "white": 1
+   },
+   "finalDieValues": {
+    "yellow": 1,
+    "blue": 2,
+    "green": 3,
+    "orange": 5,
+    "purple": 2,
+    "white": 1
+   },
+   "activeDiceFields": [
+    {
+     "color": "orange",
+     "value": 5
+    },
+    null
+   ]
+  },
+  {
+   "event": "roundStart",
+   "round": 4,
+   "bonusApplied": [
+    {
+     "player": 0,
+     "bonus": "freeX",
+     "area": "blue",
+     "bonusChoices": [
+      {
+       "effect": "blueX",
+       "target": 9
+      }
+     ]
+    },
+    {
+     "player": 1,
+     "bonus": "freeX",
+     "area": "blue",
+     "bonusChoices": [
+      {
+       "effect": "blueX",
+       "target": 2
+      }
+     ]
+    },
+    {
+     "player": 2,
+     "bonus": "freeX",
+     "area": "blue",
+     "bonusChoices": [
+      {
+       "effect": "blueX",
+       "target": 2
+      }
+     ]
+    },
+    {
+     "player": 3,
+     "bonus": "freeX",
+     "area": "yellow",
+     "bonusChoices": [
+      {
+       "effect": "yellowX",
+       "target": [
+        3,
+        3
+       ],
+       "cellValue": 6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 4,
+   "activePlayer": 0,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 2,
+      "blue": 6,
+      "green": 2,
+      "orange": 2,
+      "purple": 1,
+      "white": 4
+     },
+     "chosen": {
+      "color": "white",
+      "value": 4
+     },
+     "placed": {
+      "area": "purple",
+      "detail": 4
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "blue": 1
+     },
+     "chosen": null,
+     "reason": "no legal placement - pick burned"
+    },
+    {
+     "pick": 3,
+     "roll": {
+      "blue": 6
+     },
+     "chosen": {
+      "color": "blue",
+      "value": 6
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 10
+     },
+     "bonusChoices": []
+    }
+   ],
+   "platter": {
+    "yellow": 2,
+    "green": 2,
+    "orange": 2,
+    "purple": 1
+   },
+   "passive": [
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 2
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 2
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 2
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 2
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 2
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 2
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 2,
+    "blue": 6,
+    "green": 2,
+    "orange": 2,
+    "purple": 1,
+    "white": 4
+   },
+   "finalDieValues": {
+    "yellow": 2,
+    "blue": 6,
+    "green": 2,
+    "orange": 2,
+    "purple": 1,
+    "white": 4
+   },
+   "activeDiceFields": [
+    {
+     "color": "white",
+     "value": 4
+    },
+    null,
+    {
+     "color": "blue",
+     "value": 6
+    }
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 4,
+   "activePlayer": 1,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 6,
+      "blue": 4,
+      "green": 3,
+      "orange": 1,
+      "purple": 2,
+      "white": 2
+     },
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 2
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "yellow": 3,
+      "blue": 6,
+      "green": 3,
+      "purple": 1
+     },
+     "chosen": {
+      "color": "blue",
+      "value": 6
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 8
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "orange": 1,
+    "yellow": 3,
+    "green": 3,
+    "purple": 1
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "green",
+      "value": 3
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "orange",
+      "value": 1
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 1
+     },
+     "bonusChoices": [
+      {
+       "effect": "yellowX",
+       "target": [
+        0,
+        2
+       ],
+       "cellValue": 5
+      },
+      {
+       "effect": "blueX",
+       "target": 4
+      },
+      {
+       "effect": "orange",
+       "value": 5,
+       "target": 5
+      }
+     ]
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 3
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       0,
+       0
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 6,
+    "blue": 4,
+    "green": 3,
+    "orange": 1,
+    "purple": 2,
+    "white": 2
+   },
+   "finalDieValues": {
+    "yellow": 3,
+    "blue": 6,
+    "green": 3,
+    "orange": 1,
+    "purple": 1,
+    "white": 2
+   },
+   "activeDiceFields": [
+    {
+     "color": "white",
+     "value": 2
+    },
+    {
+     "color": "blue",
+     "value": 6
+    },
+    null
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 4,
+   "activePlayer": 2,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 2,
+      "blue": 1,
+      "green": 6,
+      "orange": 4,
+      "purple": 1,
+      "white": 5
+     },
+     "chosen": {
+      "color": "green",
+      "value": 6
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 2,
+     "roll": {},
+     "chosen": null,
+     "reason": "no dice left"
+    }
+   ],
+   "platter": {
+    "yellow": 2,
+    "blue": 1,
+    "orange": 4,
+    "purple": 1,
+    "white": 5
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 5
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 5
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 3,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 5
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 5
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 2,
+    "blue": 1,
+    "green": 6,
+    "orange": 4,
+    "purple": 1,
+    "white": 5
+   },
+   "finalDieValues": {
+    "yellow": 2,
+    "blue": 1,
+    "green": 6,
+    "orange": 4,
+    "purple": 1,
+    "white": 5
+   },
+   "activeDiceFields": [
+    {
+     "color": "green",
+     "value": 6
+    },
+    null
+   ]
+  },
+  {
+   "event": "turn",
+   "round": 4,
+   "activePlayer": 3,
+   "picks": [
+    {
+     "pick": 1,
+     "roll": {
+      "yellow": 5,
+      "blue": 5,
+      "green": 3,
+      "orange": 3,
+      "purple": 2,
+      "white": 2
+     },
+     "chosen": {
+      "color": "orange",
+      "value": 3
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 3
+     },
+     "bonusChoices": [
+      {
+       "effect": "purple",
+       "value": 6,
+       "target": 2
+      }
+     ]
+    },
+    {
+     "pick": 2,
+     "roll": {
+      "yellow": 4,
+      "blue": 2,
+      "green": 4
+     },
+     "chosen": {
+      "color": "blue",
+      "value": 2
+     },
+     "placed": {
+      "area": "blue",
+      "detail": 4
+     },
+     "bonusChoices": []
+    },
+    {
+     "pick": 3,
+     "roll": {
+      "yellow": 1,
+      "green": 6
+     },
+     "chosen": {
+      "color": "green",
+      "value": 6
+     },
+     "placed": {
+      "area": "green",
+      "detail": null
+     },
+     "bonusChoices": []
+    }
+   ],
+   "platter": {
+    "purple": 2,
+    "white": 2,
+    "yellow": 1
+   },
+   "passive": [
+    {
+     "player": 0,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 2
+     },
+     "bonusChoices": [
+      {
+       "effect": "yellowX",
+       "target": [
+        0,
+        1
+       ],
+       "cellValue": 6
+      },
+      {
+       "effect": "blueX",
+       "target": 2
+      }
+     ]
+    },
+    {
+     "player": 1,
+     "source": "platter",
+     "chosen": {
+      "color": "white",
+      "value": 2
+     },
+     "placed": {
+      "area": "orange",
+      "detail": 2
+     },
+     "bonusChoices": []
+    },
+    {
+     "player": 2,
+     "source": "platter",
+     "chosen": {
+      "color": "yellow",
+      "value": 1
+     },
+     "placed": {
+      "area": "yellow",
+      "detail": [
+       1,
+       1
+      ]
+     },
+     "bonusChoices": []
+    }
+   ],
+   "initialRoll": {
+    "yellow": 5,
+    "blue": 5,
+    "green": 3,
+    "orange": 3,
+    "purple": 2,
+    "white": 2
+   },
+   "finalDieValues": {
+    "yellow": 1,
+    "blue": 2,
+    "green": 6,
+    "orange": 3,
+    "purple": 2,
+    "white": 2
+   },
+   "activeDiceFields": [
+    {
+     "color": "orange",
+     "value": 3
+    },
+    {
+     "color": "blue",
+     "value": 2
+    },
+    {
+     "color": "green",
+     "value": 6
+    }
+   ]
+  }
+ ],
+ "expected": [
+  {
+   "player": 0,
+   "yellowGrid": [
+    [
+     true,
+     true,
+     true,
+     false
+    ],
+    [
+     true,
+     true,
+     false,
+     true
+    ],
+    [
+     true,
+     false,
+     true,
+     true
+    ],
+    [
+     false,
+     false,
+     true,
+     false
+    ]
+   ],
+   "blue": [
+    2,
+    5,
+    9,
+    10
+   ],
+   "green": 4,
+   "orange": [
+    5,
+    4,
+    5,
+    4,
+    2
+   ],
+   "purple": [
+    2,
+    3,
+    4
+   ],
+   "foxes": 0,
+   "rerollsUnlocked": 5,
+   "plusOneUnlocked": 2,
+   "areaScores": {
+    "yellow": 26,
+    "blue": 7,
+    "green": 10,
+    "orange": 20,
+    "purple": 9
+   },
+   "foxScore": 0,
+   "total": 72
+  },
+  {
+   "player": 1,
+   "yellowGrid": [
+    [
+     true,
+     true,
+     false,
+     false
+    ],
+    [
+     true,
+     false,
+     false,
+     false
+    ],
+    [
+     true,
+     false,
+     true,
+     true
+    ],
+    [
+     false,
+     false,
+     true,
+     false
+    ]
+   ],
+   "blue": [
+    2,
+    4,
+    5,
+    8,
+    9
+   ],
+   "green": 4,
+   "orange": [
+    5,
+    2,
+    2,
+    4
+   ],
+   "purple": [
+    4,
+    6
+   ],
+   "foxes": 0,
+   "rerollsUnlocked": 4,
+   "plusOneUnlocked": 2,
+   "areaScores": {
+    "yellow": 10,
+    "blue": 11,
+    "green": 10,
+    "orange": 13,
+    "purple": 10
+   },
+   "foxScore": 0,
+   "total": 54
+  },
+  {
+   "player": 2,
+   "yellowGrid": [
+    [
+     true,
+     true,
+     true,
+     false
+    ],
+    [
+     true,
+     true,
+     false,
+     false
+    ],
+    [
+     true,
+     false,
+     true,
+     true
+    ],
+    [
+     false,
+     true,
+     true,
+     false
+    ]
+   ],
+   "blue": [
+    2,
+    3,
+    4
+   ],
+   "green": 3,
+   "orange": [
+    6,
+    1,
+    3,
+    4,
+    1,
+    5
+   ],
+   "purple": [
+    4
+   ],
+   "foxes": 0,
+   "rerollsUnlocked": 3,
+   "plusOneUnlocked": 2,
+   "areaScores": {
+    "yellow": 40,
+    "blue": 4,
+    "green": 6,
+    "orange": 20,
+    "purple": 4
+   },
+   "foxScore": 0,
+   "total": 74
+  },
+  {
+   "player": 3,
+   "yellowGrid": [
+    [
+     true,
+     false,
+     false,
+     false
+    ],
+    [
+     true,
+     true,
+     false,
+     true
+    ],
+    [
+     true,
+     false,
+     true,
+     true
+    ],
+    [
+     false,
+     false,
+     true,
+     true
+    ]
+   ],
+   "blue": [
+    4,
+    6
+   ],
+   "green": 3,
+   "orange": [
+    6,
+    5,
+    3,
+    2,
+    2,
+    4,
+    10,
+    2,
+    10,
+    3
+   ],
+   "purple": [
+    4,
+    6,
+    6
+   ],
+   "foxes": 1,
+   "rerollsUnlocked": 4,
+   "plusOneUnlocked": 3,
+   "areaScores": {
+    "yellow": 30,
+    "blue": 2,
+    "green": 6,
+    "orange": 47,
+    "purple": 16
+   },
+   "foxScore": 2,
+   "total": 103
+  }
+ ]
+}

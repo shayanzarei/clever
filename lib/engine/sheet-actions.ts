@@ -6,15 +6,32 @@ export function plusOneActionsRemaining(sheet: Sheet): number {
 }
 
 export function grantPlusOne(sheet: Sheet): Sheet {
-  return { ...sheet, plusOnes: sheet.plusOnes + 1 };
+  return {
+    ...sheet,
+    plusOnes: sheet.plusOnes + 1,
+    plusOnesEarned: sheet.plusOnesEarned + 1,
+  };
 }
 
 export function grantReroll(sheet: Sheet): Sheet {
-  return { ...sheet, rerolls: sheet.rerolls + 1 };
+  return {
+    ...sheet,
+    rerolls: sheet.rerolls + 1,
+    rerollsEarned: sheet.rerollsEarned + 1,
+  };
 }
 
 export function grantExtraDie(sheet: Sheet): Sheet {
   return grantPlusOne(sheet);
+}
+
+/** Legacy +1 pool separate from `plusOnes`; still counts toward the pad track. */
+export function grantLegacyExtraDie(sheet: Sheet): Sheet {
+  return {
+    ...sheet,
+    extraDice: sheet.extraDice + 1,
+    plusOnesEarned: sheet.plusOnesEarned + 1,
+  };
 }
 
 export function consumePlusOne(sheet: Sheet): Sheet {

@@ -69,9 +69,10 @@ describe("score pad interactivity", () => {
     const game = pickDie("die-yellow");
     const html = renderPad(game);
 
-    expect(html).toContain('data-token="plus-one"');
-    expect(html).toContain('data-count="1"');
     expect(html).toContain('data-token="reroll"');
+    expect(html).toContain('data-count="1"');
+    expect(html).toContain('data-token="plus-one"');
+    expect(html).toContain('data-count="0"');
     expect(html).not.toContain('data-token="extra-die"');
   });
 });

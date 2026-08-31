@@ -1,7 +1,7 @@
 import { resolveBlueWhiteValues } from "./blue";
-import { getDie, trayDice } from "./dice";
+import { getDie, poolDice, trayDice } from "./dice";
 import { canCross, canCrossBlue } from "./legality";
-import { activePlayer } from "./turn";
+import { activePlayer, isActivePlayer } from "./turn";
 import type { ColorArea, DieState, Game, Sheet } from "./types";
 
 const PASSIVE_COLORS: readonly Exclude<ColorArea, "blue">[] = [
@@ -47,6 +47,28 @@ export function dieHasLegalCross(
   }
 
   return false;
+}
+
+/** Whether any pool die enables a legal mark for this player. */
+export function poolDiceHasLegalCross(game: Game, playerId: string): boolean {
+  const player = game.players.find((entry) => entry.id === playerId);
+  if (!player) {
+    return false;
+  }
+  return poolDice(game.dice).some((die) =>
+    dieHasLegalCross(player.sheet, game.dice, die.id),
+  );
+}
+
+/** Active player may pass the current roll when nothing in the pool is markable. */
+export function canSkipActiveRoll(game: Game, playerId: string): boolean {
+  if (game.phase !== "active_choose" || game.awaitingCross || game.pending.length > 0) {
+    return false;
+  }
+  if (!isActivePlayer(game, playerId)) {
+    return false;
+  }
+  return poolDice(game.dice).length > 0 && !poolDiceHasLegalCross(game, playerId);
 }
 
 /** True when the tray holds a die this passive player can legally use. */

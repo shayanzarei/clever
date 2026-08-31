@@ -20,6 +20,7 @@ import {
 } from "@/app/components/game/ActionBar";
 import { DiceBoard } from "@/app/components/game/DiceBoard";
 import { GameHeader } from "@/app/components/game/GameHeader";
+import { GameResults } from "@/app/components/game/GameResults";
 import { PlayerSheet } from "@/app/components/game/PlayerSheet";
 
 type GameBoardProps = {
@@ -31,6 +32,7 @@ type GameBoardProps = {
   /** When set (online), only this seat may interact. */
   myPlayerId?: PlayerSeatId | null;
   syncing?: boolean;
+  onLeave?: () => void;
 };
 
 export function GameBoard({
@@ -41,6 +43,7 @@ export function GameBoard({
   clearError,
   myPlayerId = null,
   syncing = false,
+  onLeave,
 }: GameBoardProps) {
   const [extraDieMode, setExtraDieMode] = useState(false);
 
@@ -102,6 +105,10 @@ export function GameBoard({
     }
   }
 
+  if (game.phase === "finished") {
+    return <GameResults game={game} myPlayerId={myPlayerId} onLeave={onLeave} />;
+  }
+
   return (
     <div className="app-game game-board">
       <div className="game-board__hud">
@@ -147,6 +154,9 @@ export function GameBoard({
             }
             onSkipExtra={(playerId) =>
               dispatch({ type: "SKIP_EXTRA_DIE", playerId })
+            }
+            onSkipRoll={(playerId) =>
+              dispatch({ type: "SKIP_ROLL", playerId })
             }
             onUndoChoice={(playerId) =>
               dispatch({ type: "UNDO_DIE_CHOICE", playerId })
