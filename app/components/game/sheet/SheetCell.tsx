@@ -12,7 +12,6 @@ type SheetCellProps = {
   filled?: boolean;
   preprinted?: boolean;
   fluid?: boolean;
-  disabled?: boolean;
   onClick?: () => void;
   title?: string;
   watermark?: string;
@@ -27,13 +26,12 @@ export function SheetCell({
   filled = false,
   preprinted = false,
   fluid = false,
-  disabled = true,
   onClick,
   title,
   watermark,
   prefix,
 }: SheetCellProps) {
-  const clickable = Boolean(onClick) && !disabled;
+  const clickable = Boolean(onClick);
   const isEmpty =
     value === "" || value === "·" || value === null || value === undefined;
 

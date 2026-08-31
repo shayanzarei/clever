@@ -42,6 +42,13 @@ function roll(game: Game, values: DieFace[] = FULL_ROLL): Game {
   return reduce(game, { type: "ROLL", values });
 }
 
+function skipPlusOneIfOffered(game: Game, playerId: string): Game {
+  if (game.phase !== "passive_extra" && game.phase !== "active_extra") {
+    return game;
+  }
+  return reduce(game, { type: "SKIP_EXTRA_DIE", playerId });
+}
+
 function activeChooseCross(
   game: Game,
   dieId: string,
@@ -60,7 +67,10 @@ function activeChooseCross(
 }
 
 /** Three active choices without triggering purple-slot bonuses (white/yellow → green → orange). */
-function completeActiveTurn(game: Game): Game {
+function completeActiveTurn(
+  game: Game,
+  options: { skipPlusOne?: boolean } = {},
+): Game {
   let next = roll(game);
   next = activeChooseCross(next, "die-white", 0, {
     type: "CROSS",
@@ -91,6 +101,13 @@ function completeActiveTurn(game: Game): Game {
     color: "orange",
     value: 5,
   });
+
+  if (options.skipPlusOne !== false && next.phase === "active_extra") {
+    next = reduce(next, {
+      type: "SKIP_EXTRA_DIE",
+      playerId: activePlayerId(next),
+    });
+  }
 
   return next;
 }
@@ -178,6 +195,7 @@ describe("turn flow", () => {
       blueDie: 3,
       whiteDie: 1,
     });
+    game = skipPlusOneIfOffered(game, "p2");
 
     expect(game.activePlayerIndex).toBe(1);
     expect(game.phase).toBe("active_roll");
@@ -207,6 +225,7 @@ describe("turn flow", () => {
       blueDie: 3,
       whiteDie: 1,
     });
+    game = skipPlusOneIfOffered(game, "p3");
 
     expect(playersActingNow(game)).toEqual(["p2"]);
     expect(canPlayerActNow(game, "p3")).toBe(false);
@@ -232,9 +251,16 @@ describe("turn flow", () => {
         blueDie: 3,
         whiteDie: 1,
       });
+      game = skipPlusOneIfOffered(game, passive);
     }
 
     expect(game.round).toBe(2);
     expect(game.activePlayerIndex).toBe(0);
+    expect(game.players.every((player) => player.sheet.plusOnes === 1)).toBe(
+      true,
+    );
+    expect(game.players.every((player) => player.sheet.rerolls === 1)).toBe(
+      true,
+    );
   });
 });

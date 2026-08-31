@@ -1,5 +1,10 @@
 import type { Sheet } from "./types";
 
+/** Official +1 is the extra-mark action (saved extraDice still counts). */
+export function plusOneActionsRemaining(sheet: Sheet): number {
+  return sheet.plusOnes + sheet.extraDice;
+}
+
 export function grantPlusOne(sheet: Sheet): Sheet {
   return { ...sheet, plusOnes: sheet.plusOnes + 1 };
 }
@@ -9,14 +14,17 @@ export function grantReroll(sheet: Sheet): Sheet {
 }
 
 export function grantExtraDie(sheet: Sheet): Sheet {
-  return { ...sheet, extraDice: sheet.extraDice + 1 };
+  return grantPlusOne(sheet);
 }
 
 export function consumePlusOne(sheet: Sheet): Sheet {
-  if (sheet.plusOnes <= 0) {
-    throw new Error("No +1 actions remaining");
+  if (sheet.plusOnes > 0) {
+    return { ...sheet, plusOnes: sheet.plusOnes - 1 };
   }
-  return { ...sheet, plusOnes: sheet.plusOnes - 1 };
+  if (sheet.extraDice > 0) {
+    return { ...sheet, extraDice: sheet.extraDice - 1 };
+  }
+  throw new Error("No +1 actions remaining");
 }
 
 export function consumeReroll(sheet: Sheet): Sheet {
@@ -27,8 +35,5 @@ export function consumeReroll(sheet: Sheet): Sheet {
 }
 
 export function consumeExtraDie(sheet: Sheet): Sheet {
-  if (sheet.extraDice <= 0) {
-    throw new Error("No extra-die actions remaining");
-  }
-  return { ...sheet, extraDice: sheet.extraDice - 1 };
+  return consumePlusOne(sheet);
 }

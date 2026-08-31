@@ -23,6 +23,7 @@ import {
   crossOptionKey,
   type SheetCrossOption,
 } from "@/lib/ui/cross-options";
+import { ActionStock } from "@/app/components/game/ActionStock";
 import {
   BlueDieHint,
   BonusIcon,
@@ -66,8 +67,15 @@ export function ScorePad({
     <div className={["score-pad", highlight ? "score-pad--highlight" : ""].join(" ")}>
       <div className="score-pad__paper">
         <header className="score-pad__header">
-          <h3 className="score-pad__title">{title}</h3>
-          <span className="score-pad__total">{scoreSheet(sheet)} pts</span>
+          <div className="score-pad__identity">
+            <h3 className="score-pad__title">{title}</h3>
+            <span className="score-pad__total">{scoreSheet(sheet)} pts</span>
+          </div>
+          <ActionStock
+            plusOnes={sheet.plusOnes}
+            rerolls={sheet.rerolls}
+            extraDice={sheet.extraDice}
+          />
         </header>
 
         <div className="score-pad__board">
@@ -95,9 +103,6 @@ export function ScorePad({
         <footer className="score-pad__footer">
           <div className="score-pad__actions">
             <span className="score-pad__action-chip">🦊 {sheet.foxes}</span>
-            <span className="score-pad__action-chip">+1 ×{sheet.plusOnes}</span>
-            <span className="score-pad__action-chip">↻ ×{sheet.rerolls}</span>
-            <span className="score-pad__action-chip">＋die ×{sheet.extraDice}</span>
           </div>
           <div className="score-pad__color-scores">
             {(
@@ -167,7 +172,6 @@ function YellowBlock({
                 crossed={cell.crossed}
                 preprinted={cell.preprinted}
                 active={active}
-                disabled={!active || cell.preprinted}
                 onClick={active ? () => onCross("yellow", index) : undefined}
               />
             );
@@ -250,7 +254,6 @@ function BlueBlock({
                   value={box.sum}
                   crossed={box.crossed}
                   active={active}
-                  disabled={!active}
                   onClick={active ? () => onCross("blue", index) : undefined}
                 />
               );

@@ -42,7 +42,6 @@ export function GameBoard({
   myPlayerId = null,
   syncing = false,
 }: GameBoardProps) {
-  const [plusOneMode, setPlusOneMode] = useState(false);
   const [extraDieMode, setExtraDieMode] = useState(false);
 
   const actingPlayerId = myPlayerId ?? resolveActingPlayerId(game);
@@ -59,8 +58,8 @@ export function GameBoard({
     if (!actingPlayerId || !canAct) {
       return new Set<string>();
     }
-    return new Set(getClickableDice(game, actingPlayerId, plusOneMode, extraDieMode));
-  }, [game, actingPlayerId, canAct, plusOneMode, extraDieMode]);
+    return new Set(getClickableDice(game, actingPlayerId, extraDieMode));
+  }, [game, actingPlayerId, canAct, extraDieMode]);
 
   const sheetsToShow = useMemo(() => {
     if (myPlayerId) {
@@ -77,13 +76,7 @@ export function GameBoard({
       return;
     }
 
-    if (plusOneMode) {
-      dispatch({ type: "USE_PLUS_ONE", playerId: actingPlayerId, dieId: die.id });
-      setPlusOneMode(false);
-      return;
-    }
-
-    if (extraDieMode) {
+    if (extraDieMode || isExtraDiePickPhase(game)) {
       dispatch({ type: "USE_EXTRA_DIE", playerId: actingPlayerId, dieId: die.id });
       setExtraDieMode(false);
       return;
@@ -110,11 +103,15 @@ export function GameBoard({
   }
 
   return (
-    <div className="app-game game-board flex min-h-0 flex-1 flex-col gap-2 py-2">
+    <div className="app-game game-board">
       <div className="game-board__hud">
         <GameHeader game={game} />
 
-        {syncing && <p className="game-board__notice text-sm text-zinc-500">Syncing…</p>}
+        {syncing && (
+          <p className="game-board__notice border border-line bg-surface px-3 py-2 text-sm text-muted">
+            Syncing…
+          </p>
+        )}
 
         {error && (
           <div className="game-board__notice flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
@@ -126,6 +123,17 @@ export function GameBoard({
         )}
 
         <div className="game-board__toolbar">
+          <DiceBoard
+            compact
+            dice={game.dice}
+            clickableIds={clickableDieIds}
+            selectedId={
+              game.players.find((player) => player.id === actingPlayerId)?.passiveDieId ??
+              null
+            }
+            onDieClick={clickableDieIds.size > 0 ? handleDieClick : undefined}
+          />
+
           <ActionBar
             game={game}
             myPlayerId={myPlayerId}
@@ -146,21 +154,8 @@ export function GameBoard({
             onRoundBonus={(playerId, choice) =>
               dispatch({ type: "CHOOSE_ROUND_BONUS", playerId, choice })
             }
-            plusOneMode={plusOneMode}
-            onTogglePlusOne={() => setPlusOneMode((value) => !value)}
             extraDieMode={extraDieMode}
             onToggleExtraDie={() => setExtraDieMode((value) => !value)}
-          />
-
-          <DiceBoard
-            compact
-            dice={game.dice}
-            clickableIds={clickableDieIds}
-            selectedId={
-              game.players.find((player) => player.id === actingPlayerId)?.passiveDieId ??
-              null
-            }
-            onDieClick={clickableDieIds.size > 0 ? handleDieClick : undefined}
           />
         </div>
       </div>
@@ -190,18 +185,10 @@ export function GameBoard({
 function getClickableDice(
   game: Game,
   playerId: string,
-  plusOneMode: boolean,
   extraDieMode: boolean,
 ): string[] {
-  if (plusOneMode) {
-    return getPlusOneTargets(game, playerId);
-  }
-
-  if (extraDieMode) {
-    return game.dice
-      .filter((die) => die.location !== "consumed")
-      .filter((die) => !game.extraDieUsedIds.includes(die.id))
-      .map((die) => die.id);
+  if (extraDieMode || isExtraDiePickPhase(game)) {
+    return extraDieTargets(game);
   }
 
   if (game.phase === "active_choose" && isActivePlayer(game, playerId) && !game.awaitingCross) {
@@ -230,19 +217,13 @@ function getClickableDice(
   return [];
 }
 
-function getPlusOneTargets(game: Game, playerId: string): string[] {
-  const player = game.players.find((entry) => entry.id === playerId);
-  if (!player || player.sheet.plusOnes <= 0) {
-    return [];
-  }
+function isExtraDiePickPhase(game: Game): boolean {
+  return game.phase === "active_extra" || game.phase === "passive_extra";
+}
 
-  if (isActivePlayer(game, playerId)) {
-    return game.dice.filter((die) => die.location === "pool").map((die) => die.id);
-  }
-
-  if (player.passiveDieId) {
-    return [player.passiveDieId];
-  }
-
-  return getClickableDice(game, playerId, false, false);
+function extraDieTargets(game: Game): string[] {
+  return game.dice
+    .filter((die) => die.location !== "consumed")
+    .filter((die) => !game.extraDieUsedIds.includes(die.id))
+    .map((die) => die.id);
 }

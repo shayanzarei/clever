@@ -23,6 +23,7 @@ export function OnlineGameApp({ code }: OnlineGameAppProps) {
     dispatch,
     roll,
     startGame,
+    shuffleTurnOrder,
     setPlayerCount,
     updateDisplayName,
     deleteGameSession,
@@ -38,7 +39,7 @@ export function OnlineGameApp({ code }: OnlineGameAppProps) {
 
   if (loading) {
     return (
-      <div className="app-game flex min-h-0 flex-1 items-center justify-center overflow-y-auto py-8 text-sm text-zinc-600">
+      <div className="flex min-h-dvh flex-1 items-center justify-center bg-ink text-sm text-muted">
         Connecting to room…
       </div>
     );
@@ -46,9 +47,9 @@ export function OnlineGameApp({ code }: OnlineGameAppProps) {
 
   if (!snapshot) {
     return (
-      <div className="app-game flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto py-8 pb-safe">
-        <p className="text-sm text-red-700">{error ?? "Could not load room"}</p>
-        <Link href="/" className="text-sm text-zinc-600 hover:text-zinc-900">
+      <div className="flex min-h-dvh flex-1 flex-col items-center justify-center gap-4 bg-ink">
+        <p className="text-sm text-red-300">{error ?? "Could not load room"}</p>
+        <Link href="/" className="text-sm text-muted">
           ← Back to menu
         </Link>
       </div>
@@ -57,22 +58,27 @@ export function OnlineGameApp({ code }: OnlineGameAppProps) {
 
   if (snapshot.status === "lobby" || !game) {
     return (
-      <div className="app-game flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto py-4 pb-safe">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-ink">
         <OnlineLobby
           code={snapshot.code}
           playerCount={snapshot.playerCount}
           members={snapshot.members}
           playerId={playerId}
           onStart={() => void startGame()}
+          onShuffle={() => void shuffleTurnOrder()}
           onPlayerCountChange={(count) => void setPlayerCount(count)}
           onDisplayNameChange={(name) => void updateDisplayName(name)}
           onDeleteRoom={() => void handleDeleteRoom()}
+          turnOrder={snapshot.turnOrder}
           starting={lobbyAction === "start"}
+          shuffling={lobbyAction === "shuffle"}
           updatingCount={lobbyAction === "count"}
           updatingName={lobbyAction === "name"}
           deleting={lobbyAction === "delete"}
         />
-        {error && <p className="text-sm text-red-700">{error}</p>}
+        {error && (
+          <p className="px-5 pb-6 text-center text-sm text-red-300">{error}</p>
+        )}
       </div>
     );
   }

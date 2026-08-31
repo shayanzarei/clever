@@ -27,7 +27,10 @@ function roll(game: Game, values: DieFace[] = FULL_ROLL): Game {
 }
 
 /** Three active choices without purple-slot bonuses (white/yellow → green → orange). */
-function completeActiveTurn(game: Game): Game {
+function completeActiveTurn(
+  game: Game,
+  options: { skipPlusOne?: boolean } = {},
+): Game {
   let next = roll(game);
   next = reduce(next, {
     type: "CHOOSE_DIE",
@@ -80,6 +83,13 @@ function completeActiveTurn(game: Game): Game {
     value: 5,
   });
 
+  if (options.skipPlusOne !== false && next.phase === "active_extra") {
+    next = reduce(next, {
+      type: "SKIP_EXTRA_DIE",
+      playerId: activePlayerId(next),
+    });
+  }
+
   return next;
 }
 
@@ -90,11 +100,11 @@ describe("round-start bonuses", () => {
     expect(game.players.every((player) => player.sheet.rerolls === 0)).toBe(true);
   });
 
-  it("requires round-4 bonus choice before rolling", () => {
+  it("lets the active player take the silver bonus then play", () => {
     let game = beginRoundFourBonus({ ...startGame(), round: 4 });
 
     expect(game.phase).toBe("round_bonus_choose");
-    expect(game.roundBonusPendingPlayerIds).toEqual(["p1", "p2"]);
+    expect(game.roundBonusPendingPlayerIds).toEqual(["p1"]);
     expect(() => roll(game)).toThrow("ROLL is only allowed during active_roll");
 
     game = reduce(game, {
@@ -111,6 +121,54 @@ describe("round-start bonuses", () => {
       targetIndex: 0,
     });
 
+    expect(game.phase).toBe("active_roll");
+    expect(game.activePlayerIndex).toBe(0);
+    expect(game.roundBonusPendingPlayerIds).toEqual([]);
+    expect(game.players[0].sheet.yellow.grid[0][0].crossed).toBe(true);
+    expect(() =>
+      reduce(game, {
+        type: "CHOOSE_ROUND_BONUS",
+        playerId: "p2",
+        choice: "black_six",
+      }),
+    ).toThrow("CHOOSE_ROUND_BONUS is only allowed during round_bonus_choose");
+  });
+
+  it("does not wait for the other player after a leftover all-player queue", () => {
+    let game = beginRoundFourBonus({ ...startGame(), round: 4 });
+    game = {
+      ...game,
+      roundBonusPendingPlayerIds: ["p1", "p2"],
+    };
+
+    game = reduce(game, {
+      type: "CHOOSE_ROUND_BONUS",
+      playerId: "p1",
+      choice: "black_x",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "yellow",
+      value: 3,
+      targetIndex: 0,
+    });
+
+    expect(game.phase).toBe("active_roll");
+    expect(game.roundBonusPendingPlayerIds).toEqual([]);
+    expect(game.activePlayerIndex).toBe(0);
+  });
+
+  it("asks the next player for silver X or 6 when their turn starts", () => {
+    let game = beginRoundFourBonus({
+      ...startGame(),
+      round: 4,
+      activePlayerIndex: 1,
+    });
+
+    expect(game.roundBonusPendingPlayerIds).toEqual(["p2"]);
+    expect(() => roll(game)).toThrow("ROLL is only allowed during active_roll");
+
     game = reduce(game, {
       type: "CHOOSE_ROUND_BONUS",
       playerId: "p2",
@@ -124,7 +182,53 @@ describe("round-start bonuses", () => {
     });
 
     expect(game.phase).toBe("active_roll");
+    expect(game.activePlayerIndex).toBe(1);
     expect(game.players[1].sheet.orange.boxes[0].value).toBe(6);
+  });
+
+  it("lets the active player finish the whole turn before the other player gets silver", () => {
+    let game = beginRoundFourBonus({
+      ...startGame(),
+      round: 4,
+      roundBonusPendingPlayerIds: ["p1", "p2"],
+    });
+
+    game = reduce(game, {
+      type: "CHOOSE_ROUND_BONUS",
+      playerId: "p1",
+      choice: "black_x",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "yellow",
+      value: 3,
+      targetIndex: 0,
+    });
+
+    expect(game.phase).toBe("active_roll");
+    expect(game.activePlayerIndex).toBe(0);
+
+    game = completeActiveTurn(game);
+
+    expect(game.activePlayerIndex).toBe(0);
+    expect(game.phase).toBe("passive_choose");
+    expect(() =>
+      reduce(game, {
+        type: "CHOOSE_ROUND_BONUS",
+        playerId: "p2",
+        choice: "black_six",
+      }),
+    ).toThrow("CHOOSE_ROUND_BONUS is only allowed during round_bonus_choose");
+
+    game = reduce(game, { type: "SKIP_EXTRA_DIE", playerId: "p2" });
+    if (game.phase === "passive_extra") {
+      game = reduce(game, { type: "SKIP_EXTRA_DIE", playerId: "p2" });
+    }
+
+    expect(game.activePlayerIndex).toBe(1);
+    expect(game.phase).toBe("round_bonus_choose");
+    expect(game.roundBonusPendingPlayerIds).toEqual(["p2"]);
   });
 });
 
@@ -157,85 +261,24 @@ describe("sheet actions", () => {
     expect(game.players[0].sheet.rerolls).toBe(0);
   });
 
-  it("USE_PLUS_ONE bumps a pool die and consumes +1", () => {
-    let game = roll(startGame());
+  it("USE_PLUS_ONE after the main turn scores an extra mark", () => {
+    let game = startGame();
+    game = completeActiveTurn(game, { skipPlusOne: false });
+    expect(game.phase).toBe("active_extra");
+
+    const white = game.dice.find((die) => die.id === "die-white")!.value;
     game = reduce(game, { type: "USE_PLUS_ONE", playerId: "p1", dieId: "die-white" });
-    expect(game.dice.find((die) => die.id === "die-white")?.value).toBe(2);
+    expect(game.dice.find((die) => die.id === "die-white")?.value).toBe(white);
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "yellow",
+      value: white,
+      targetIndex: 5,
+    });
+
     expect(game.players[0].sheet.plusOnes).toBe(0);
-  });
-
-  it("passive player may +1 a tray die before taking it", () => {
-    let game = completeActiveTurn(startGame());
-    expect(game.phase).toBe("passive_choose");
-
-    game = {
-      ...game,
-      players: game.players.map((player, index) =>
-        index === 1
-          ? { ...player, sheet: { ...player.sheet, plusOnes: 1 } }
-          : player,
-      ),
-    };
-
-    game = reduce(game, { type: "USE_PLUS_ONE", playerId: "p2", dieId: "die-blue" });
-    expect(game.dice.find((die) => die.id === "die-blue")?.value).toBe(4);
-    expect(game.players[1].sheet.plusOnes).toBe(0);
-
-    game = reduce(game, { type: "PASSIVE_TAKE", playerId: "p2", dieId: "die-blue" });
-    game = reduce(game, {
-      type: "CROSS",
-      playerId: "p2",
-      color: "blue",
-      blueDie: 4,
-      whiteDie: 1,
-    });
-
-    expect(game.players[1].sheet.blue.boxes[3].crossed).toBe(true);
-  });
-
-  it("passive player may +1 a selected die before crossing", () => {
-    let game = completeActiveTurn(startGame());
-    game = {
-      ...game,
-      players: game.players.map((player, index) =>
-        index === 1
-          ? { ...player, sheet: { ...player.sheet, plusOnes: 1 } }
-          : player,
-      ),
-    };
-
-    game = reduce(game, { type: "PASSIVE_TAKE", playerId: "p2", dieId: "die-blue" });
-    game = reduce(game, { type: "USE_PLUS_ONE", playerId: "p2", dieId: "die-blue" });
-    game = reduce(game, {
-      type: "CROSS",
-      playerId: "p2",
-      color: "blue",
-      blueDie: 4,
-      whiteDie: 1,
-    });
-
-    expect(game.players[1].sheet.blue.boxes[3].crossed).toBe(true);
-  });
-
-  it("rejects passive +1 on pool dice", () => {
-    let game = completeActiveTurn(startGame());
-    game = {
-      ...game,
-      players: game.players.map((player, index) =>
-        index === 1
-          ? { ...player, sheet: { ...player.sheet, plusOnes: 1 } }
-          : player,
-      ),
-      dice: game.dice.map((die) =>
-        die.id === "die-purple"
-          ? { ...die, location: "pool" as const, slotIndex: undefined }
-          : die,
-      ),
-    };
-
-    expect(() =>
-      reduce(game, { type: "USE_PLUS_ONE", playerId: "p2", dieId: "die-purple" }),
-    ).toThrow("+1 may only be applied to tray or slot dice");
+    expect(game.extraDieUsedIds).toContain("die-white");
   });
 
   it("USE_EXTRA_DIE after active turn allows a fourth mark", () => {
@@ -249,7 +292,7 @@ describe("sheet actions", () => {
       ),
     };
 
-    game = completeActiveTurn(game);
+    game = completeActiveTurn(game, { skipPlusOne: false });
     expect(game.phase).toBe("active_extra");
 
     game = reduce(game, { type: "USE_EXTRA_DIE", playerId: "p1", dieId: "die-green" });
@@ -263,6 +306,69 @@ describe("sheet actions", () => {
     expect(game.phase).toBe("passive_choose");
     expect(game.players[0].sheet.extraDice).toBe(0);
     expect(game.extraDieUsedIds).toContain("die-green");
+  });
+
+  it("rejects using the same die twice as an extra die", () => {
+    let game = startGame();
+    game = {
+      ...game,
+      players: game.players.map((player, index) =>
+        index === 0
+          ? { ...player, sheet: { ...player.sheet, extraDice: 2, plusOnes: 0 } }
+          : player,
+      ),
+    };
+    game = completeActiveTurn(game, { skipPlusOne: false });
+    game = reduce(game, { type: "USE_EXTRA_DIE", playerId: "p1", dieId: "die-green" });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "green",
+      value: 4,
+    });
+
+    expect(game.phase).toBe("active_extra");
+    expect(() =>
+      reduce(game, { type: "USE_EXTRA_DIE", playerId: "p1", dieId: "die-green" }),
+    ).toThrow("Die already used for an extra-die action this turn");
+  });
+
+  it("lets a passive player spend extra die without taking a leftover", () => {
+    let game = completeActiveTurn(startGame());
+    game = {
+      ...game,
+      players: game.players.map((player, index) =>
+        index === 1
+          ? { ...player, sheet: { ...player.sheet, extraDice: 1, plusOnes: 0 } }
+          : player,
+      ),
+    };
+
+    expect(game.phase).toBe("passive_choose");
+    game = reduce(game, { type: "USE_EXTRA_DIE", playerId: "p2", dieId: "die-orange" });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p2",
+      color: "orange",
+      value: 5,
+    });
+
+    expect(game.players[1].sheet.orange.boxes[0].value).toBe(5);
+    expect(game.players[1].sheet.extraDice).toBe(0);
+    expect(game.activePlayerIndex).toBe(1);
+  });
+
+  it("lets a passive player skip the leftover die", () => {
+    let game = completeActiveTurn(startGame());
+    expect(game.phase).toBe("passive_choose");
+
+    game = reduce(game, { type: "SKIP_EXTRA_DIE", playerId: "p2" });
+    if (game.phase === "passive_extra") {
+      game = reduce(game, { type: "SKIP_EXTRA_DIE", playerId: "p2" });
+    }
+
+    expect(game.activePlayerIndex).toBe(1);
+    expect(game.phase).toBe("active_roll");
   });
 });
 

@@ -73,10 +73,10 @@ function rollValuesForCross(cross: CrossAction): DieFace[] {
       }
     } else if (cross.color === "blue") {
       if (face.color === "blue") {
-        return { ...face, value: cross.blueDie };
+        return { ...face, value: cross.blueDie ?? defaults.blue };
       }
       if (face.color === "white") {
-        return { ...face, value: cross.whiteDie };
+        return { ...face, value: cross.whiteDie ?? defaults.white };
       }
     } else if (face.color === cross.color) {
       return { ...face, value: cross.value as DieValue };
@@ -203,6 +203,37 @@ describe("reduce bonus chains", () => {
 
     expect(game.players[0].sheet.blue.boxes[5].crossed).toBe(true);
     expect(game.players[0].sheet.purple.boxes[0].value).toBe(6);
+    expect(game.pending).toEqual([]);
+  });
+
+  it("lets a free blue bonus mark any uncrossed box, ignoring the dice sum", () => {
+    let game = startTwoPlayerGame();
+
+    for (const [index, value] of [
+      [0, 3],
+      [1, 6],
+      [2, 5],
+    ] as const) {
+      game = performCross(game, {
+        type: "CROSS",
+        playerId: "p1",
+        color: "yellow",
+        value,
+        targetIndex: index,
+      });
+    }
+
+    expect(game.pending[0]).toEqual({ type: "cross_blue_free" });
+
+    game = performCross(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "blue",
+      targetIndex: 10,
+    });
+
+    expect(game.players[0].sheet.blue.boxes[10].crossed).toBe(true);
+    expect(game.players[0].sheet.blue.boxes[10].sum).toBe(12);
     expect(game.pending).toEqual([]);
   });
 

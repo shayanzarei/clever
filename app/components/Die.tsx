@@ -68,7 +68,7 @@ export function Die({
     SIZE_STYLES[size],
     isUsed ? "bg-[#6b7280]" : FACE_STYLES[color],
     isSelected
-      ? `ring-2 ring-offset-2 ring-offset-[#2b2735] ${RING_STYLES[color]}`
+      ? `ring-2 ring-offset-2 ring-offset-[#13111c] ${RING_STYLES[color]}`
       : "",
     isHighlighted && !isSelected ? "scale-105 shadow-md" : "",
     interactive ? "cursor-pointer hover:brightness-110" : "",

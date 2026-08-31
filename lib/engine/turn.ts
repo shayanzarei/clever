@@ -1,7 +1,9 @@
+import { plusOneActionsRemaining } from "./sheet-actions";
 import type { Game, Player } from "./types";
 import {
   applyRoundStartActions,
   beginRoundFourBonus,
+  isSilverBonusRound,
 } from "./round-start";
 
 export function activePlayer(game: Game): Player {
@@ -42,7 +44,10 @@ export function canPlayerActNow(game: Game, playerId: string): boolean {
   }
 
   if (game.phase === "round_bonus_choose") {
-    return game.roundBonusPendingPlayerIds.includes(playerId);
+    return (
+      isActivePlayer(game, playerId) &&
+      game.roundBonusPendingPlayerIds.includes(playerId)
+    );
   }
 
   if (game.awaitingCross) {
@@ -96,16 +101,46 @@ export function clearActiveTurnState(game: Game): Game {
 
 export function extraDieActionsAvailable(game: Game, playerId: string): number {
   const player = game.players.find((entry) => entry.id === playerId);
-  if (!player) {
-    return 0;
-  }
-  const used = game.extraDieActionsUsed[playerId] ?? 0;
-  return player.sheet.extraDice - used;
+  return player ? plusOneActionsRemaining(player.sheet) : 0;
 }
 
-export function beginRound(game: Game): Game {
-  let next = applyRoundStartActions(game, game.round);
-  if (game.round === 4) {
+/** Extra die is spent at the end of the active turn and/or the passive turn. */
+export function canUseExtraDie(game: Game, playerId: string): boolean {
+  if (game.pending.length > 0 || game.awaitingCross) {
+    return false;
+  }
+  if (extraDieActionsAvailable(game, playerId) <= 0) {
+    return false;
+  }
+
+  if (game.phase === "active_extra") {
+    return isActivePlayer(game, playerId);
+  }
+
+  if (game.phase === "passive_extra" || game.phase === "passive_choose") {
+    const player = game.players.find((entry) => entry.id === playerId);
+    if (!player || isActivePlayer(game, playerId)) {
+      return false;
+    }
+    if (game.passiveCompletedPlayerIds.includes(playerId)) {
+      return false;
+    }
+    if (game.phase === "passive_choose" && player.passiveDieId) {
+      return false;
+    }
+    return true;
+  }
+
+  return false;
+}
+
+export function beginRound(
+  game: Game,
+  options: { applyGrants?: boolean } = {},
+): Game {
+  const applyGrants = options.applyGrants ?? true;
+  let next = applyGrants ? applyRoundStartActions(game, game.round) : game;
+  if (isSilverBonusRound(next.round)) {
     next = beginRoundFourBonus(next);
   }
   return next;
@@ -133,7 +168,7 @@ export function advanceTurn(game: Game): Game {
         slotIndex: undefined,
       })),
     };
-    next = beginRound(next);
+    next = beginRound(next, { applyGrants: roundAdvanced });
   }
 
   return next;

@@ -8,6 +8,7 @@ import { getSupabaseBrowserClient, isSupabaseBrowserConfigured } from "@/lib/sup
 import type { GameSnapshot } from "@/lib/supabase/types";
 import type { PlayerCount, PlayerSeatId } from "@/lib/game/player-seats";
 import { isPlayerCount } from "@/lib/game/player-seats";
+import { isLobbyTurnOrderState } from "@/lib/game/turn-order";
 import { rollPoolDice } from "@/lib/ui/rolls";
 
 type OnlineGameState = {
@@ -16,7 +17,7 @@ type OnlineGameState = {
   error: string | null;
   loading: boolean;
   syncing: boolean;
-  lobbyAction: "start" | "count" | "name" | "delete" | null;
+  lobbyAction: "start" | "count" | "name" | "delete" | "shuffle" | null;
 };
 
 export function useOnlineGame(code: string) {
@@ -156,17 +157,24 @@ export function useOnlineGame(code: string) {
         (payload) => {
           const row = payload.new as {
             status: GameSnapshot["status"];
-            state: GameSnapshot["state"];
+            state: unknown;
             version: number;
             player_count?: number;
           };
+          const lobbyOrder = isLobbyTurnOrderState(row.state)
+            ? row.state.seats
+            : null;
           setState((current) => ({
             ...current,
             snapshot: current.snapshot
               ? {
                   ...current.snapshot,
                   status: row.status,
-                  state: row.state,
+                  state:
+                    row.status === "lobby"
+                      ? null
+                      : ((row.state as GameSnapshot["state"]) ?? null),
+                  turnOrder: row.status === "lobby" ? lobbyOrder : null,
                   version: row.version,
                   playerCount:
                     row.player_count && isPlayerCount(row.player_count)
@@ -259,6 +267,37 @@ export function useOnlineGame(code: string) {
       values: rollPoolDice(poolDice(game.dice)),
     });
   }, [dispatch, state.snapshot?.state]);
+
+  const shuffleTurnOrder = useCallback(async () => {
+    setState((current) => ({
+      ...current,
+      syncing: true,
+      lobbyAction: "shuffle",
+      error: null,
+    }));
+    const response = await fetch(`/api/games/${normalizedCode}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clientId: clientIdRef.current || getClientId(),
+        shuffleTurnOrder: true,
+      }),
+    });
+
+    const payload = (await response.json()) as GameSnapshot & { error?: string };
+
+    if (!response.ok) {
+      setState((current) => ({
+        ...current,
+        error: payload.error ?? "Could not shuffle turn order",
+        syncing: false,
+        lobbyAction: null,
+      }));
+      return;
+    }
+
+    applySnapshot(payload);
+  }, [applySnapshot, normalizedCode]);
 
   const startGame = useCallback(async () => {
     setState((current) => ({
@@ -404,6 +443,7 @@ export function useOnlineGame(code: string) {
     dispatch,
     roll,
     startGame,
+    shuffleTurnOrder,
     setPlayerCount,
     updateDisplayName,
     deleteGameSession,

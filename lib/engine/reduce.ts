@@ -1,4 +1,5 @@
 import {
+  applyBlueCross,
   applyBlueCrossBySum,
   applyGreenCross,
   applyOrangeFill,
@@ -13,7 +14,6 @@ import {
   processAutoChain,
 } from "./effects";
 import {
-  applyPlusOneToDie,
   applyRollValues,
   chooseDieToSlot,
   createInitialDice,
@@ -24,13 +24,12 @@ import {
   returnDieToPool,
   trayedByChoice,
 } from "./dice";
-import { validatePassivePlusOneTarget, validatePassiveTake } from "./passive";
+import { validatePassiveTake } from "./passive";
 import {
-  allRoundBonusesChosen,
   beginRoundFourBonus,
   roundBonusEffect,
 } from "./round-start";
-import { consumeExtraDie, consumePlusOne, consumeReroll } from "./sheet-actions";
+import { consumeExtraDie, consumeReroll } from "./sheet-actions";
 import { createEmptySheet } from "./sheet";
 import {
   activePlayerId,
@@ -38,6 +37,7 @@ import {
   allPassivesCompleted,
   beginRound,
   extraDieActionsAvailable,
+  canUseExtraDie,
   isActivePlayer,
 } from "./turn";
 import type {
@@ -127,12 +127,42 @@ function resumePhaseAfterCross(game: Game): GamePhase {
 }
 
 function resumeAfterPendingResolution(game: Game): Game {
-  if (!allRoundBonusesChosen(game) && game.pending.length === 0) {
-    return bump(game, { phase: "round_bonus_choose" });
+  if (game.pending.length > 0) {
+    return game;
   }
-  if (game.pending.length === 0 && game.phase === "resolve_pending") {
-    return bump(game, { phase: "active_roll" });
+
+  const activeId = activePlayerId(game);
+  const forActive = game.roundBonusPendingPlayerIds.filter(
+    (id) => id === activeId,
+  );
+  const turnUnderway =
+    game.activeRollCount > 0 || game.awaitingCross !== null;
+
+  // Another player's leftover silver waits until they become active.
+  if (turnUnderway) {
+    return forActive.length === game.roundBonusPendingPlayerIds.length
+      ? game
+      : bump(game, { roundBonusPendingPlayerIds: forActive });
   }
+
+  if (forActive.length > 0) {
+    return bump(game, {
+      phase: "round_bonus_choose",
+      roundBonusPendingPlayerIds: forActive,
+    });
+  }
+
+  if (game.phase === "resolve_pending") {
+    return bump(game, {
+      phase: "active_roll",
+      roundBonusPendingPlayerIds: [],
+    });
+  }
+
+  if (game.roundBonusPendingPlayerIds.length > 0) {
+    return bump(game, { roundBonusPendingPlayerIds: [] });
+  }
+
   return game;
 }
 
@@ -258,9 +288,12 @@ function startGame(action: Extract<Action, { type: "START_GAME" }>): Game {
   if (action.playerNames.length !== action.playerCount) {
     throw new Error("playerNames length must match playerCount");
   }
+  if (action.playerIds && action.playerIds.length !== action.playerCount) {
+    throw new Error("playerIds length must match playerCount");
+  }
 
   const players: Player[] = action.playerNames.map((name, index) => ({
-    id: `p${index + 1}`,
+    id: action.playerIds?.[index] ?? `p${index + 1}`,
     name,
     sheet: createEmptySheet(),
     diceSlots: [null, null, null],
@@ -459,56 +492,19 @@ function usePlusOne(
   game: Game,
   action: Extract<Action, { type: "USE_PLUS_ONE" }>,
 ): Game {
-  if (game.pending.length > 0) {
-    throw new Error("Cannot use +1 while effects are pending");
-  }
-  if (game.awaitingCross) {
-    throw new Error("Must complete cross before using +1");
-  }
-
-  const player = getPlayer(game, action.playerId);
-  if (player.sheet.plusOnes <= 0) {
-    throw new Error("No +1 actions remaining");
-  }
-
-  let dice;
-
-  if (isActivePlayer(game, action.playerId)) {
-    if (game.phase !== "active_choose") {
-      throw new Error("USE_PLUS_ONE is only allowed during active_choose");
-    }
-    dice = applyPlusOneToDie(game.dice, action.dieId, ["pool"]);
-  } else {
-    if (game.phase !== "passive_choose") {
-      throw new Error("USE_PLUS_ONE is only allowed during passive_choose");
-    }
-    if (game.passiveCompletedPlayerIds.includes(action.playerId)) {
-      throw new Error("Passive player already acted this turn");
-    }
-    validatePassivePlusOneTarget(game, action.playerId, action.dieId);
-    dice = applyPlusOneToDie(game.dice, action.dieId, ["tray", "slot"]);
-  }
-
-  return bump(
-    updatePlayer({ ...game, dice }, action.playerId, {
-      sheet: consumePlusOne(player.sheet),
-    }),
-    {},
-  );
+  return useExtraDie(game, {
+    type: "USE_EXTRA_DIE",
+    playerId: action.playerId,
+    dieId: action.dieId,
+  });
 }
 
 function useExtraDie(
   game: Game,
   action: Extract<Action, { type: "USE_EXTRA_DIE" }>,
 ): Game {
-  if (game.phase !== "active_extra" && game.phase !== "passive_extra") {
-    throw new Error("USE_EXTRA_DIE is only allowed during extra-die phase");
-  }
-  if (game.awaitingCross) {
-    throw new Error("Must complete cross before choosing another extra die");
-  }
-  if (extraDieActionsAvailable(game, action.playerId) <= 0) {
-    throw new Error("No extra-die actions remaining");
+  if (!canUseExtraDie(game, action.playerId)) {
+    throw new Error("USE_EXTRA_DIE is only allowed at the end of a main or passive turn");
   }
   if (game.extraDieUsedIds.includes(action.dieId)) {
     throw new Error("Die already used for an extra-die action this turn");
@@ -519,14 +515,11 @@ function useExtraDie(
     throw new Error("Extra die must be one of the six dice in play");
   }
 
-  if (game.phase === "active_extra" && !isActivePlayer(game, action.playerId)) {
-    throw new Error("Only the active player may use extra dice now");
-  }
-  if (game.phase === "passive_extra" && isActivePlayer(game, action.playerId)) {
-    throw new Error("Active player cannot use passive extra-die phase");
-  }
+  const phase =
+    game.phase === "passive_choose" ? "passive_extra" : game.phase;
 
   return bump(game, {
+    phase,
     awaitingCross: {
       playerId: action.playerId,
       extraDieId: action.dieId,
@@ -552,6 +545,20 @@ function skipExtraDie(
     return completePassivePlayer(game, action.playerId);
   }
 
+  if (game.phase === "passive_choose") {
+    if (isActivePlayer(game, action.playerId)) {
+      throw new Error("Active player cannot skip the passive turn");
+    }
+    const player = getPlayer(game, action.playerId);
+    if (player.passiveDieId) {
+      throw new Error("Must cross the leftover die before skipping");
+    }
+    if (extraDieActionsAvailable(game, action.playerId) > 0) {
+      return bump(game, { phase: "passive_extra" });
+    }
+    return completePassivePlayer(game, action.playerId);
+  }
+
   throw new Error("SKIP_EXTRA_DIE is only allowed during extra-die phase");
 }
 
@@ -561,6 +568,9 @@ function chooseRoundBonus(
 ): Game {
   if (game.phase !== "round_bonus_choose") {
     throw new Error("CHOOSE_ROUND_BONUS is only allowed during round_bonus_choose");
+  }
+  if (!isActivePlayer(game, action.playerId)) {
+    throw new Error("Only the active player may choose the silver bonus");
   }
   if (!game.roundBonusPendingPlayerIds.includes(action.playerId)) {
     throw new Error("Round bonus already chosen for this player");
@@ -625,6 +635,17 @@ function crossDuringPending(
       break;
     }
     case "blue": {
+      if (head.type === "cross_blue_free" || head.type === "round_black_x") {
+        const index = action.targetIndex;
+        if (index === undefined || player.sheet.blue.boxes[index]?.crossed) {
+          throw new Error("Blue target required");
+        }
+        result = applyBlueCross(player.sheet, index);
+        break;
+      }
+      if (action.blueDie === undefined || action.whiteDie === undefined) {
+        throw new Error("Blue and white dice are required");
+      }
       result = applyChoiceBlue(
         player.sheet,
         action.blueDie,
@@ -746,6 +767,9 @@ function crossNormal(
       break;
     }
     case "blue": {
+      if (action.blueDie === undefined || action.whiteDie === undefined) {
+        throw new Error("Blue and white dice are required");
+      }
       const applied = applyBlueCrossBySum(
         player.sheet,
         action.blueDie,

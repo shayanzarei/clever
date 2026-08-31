@@ -1,5 +1,6 @@
 import type { Game } from "@/lib/engine/types";
 import type { PlayerCount, PlayerSeatId } from "@/lib/game/player-seats";
+import type { LobbyTurnOrderState } from "@/lib/game/turn-order";
 
 export type GameStatus = "lobby" | "playing" | "finished";
 
@@ -8,7 +9,7 @@ export type GameRow = {
   code: string;
   status: GameStatus;
   player_count: PlayerCount;
-  state: Game | null;
+  state: Game | LobbyTurnOrderState | null;
   version: number;
   created_at: string;
   updated_at: string;
@@ -31,4 +32,6 @@ export type GameSnapshot = {
   state: Game | null;
   version: number;
   members: GameMemberRow[];
+  /** Shared seat order while still in lobby; first entry goes first. */
+  turnOrder: PlayerSeatId[] | null;
 };

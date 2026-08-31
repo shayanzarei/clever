@@ -12,6 +12,11 @@ import {
 import { createAdminClient } from "@/lib/supabase/server";
 import type { GameMemberRow, GameRow, GameSnapshot } from "@/lib/supabase/types";
 import { generateGameCode } from "@/lib/server/game-code";
+import {
+  isLobbyTurnOrderState,
+  shuffleSeats,
+  type LobbyTurnOrderState,
+} from "@/lib/game/turn-order";
 
 export class GameRepositoryError extends Error {
   constructor(
@@ -32,16 +37,44 @@ function normalizePlayerCount(value: number | null | undefined): PlayerCount {
   return 2;
 }
 
+function playingState(state: GameRow["state"]): Game | null {
+  if (!state || isLobbyTurnOrderState(state)) {
+    return null;
+  }
+  return state;
+}
+
 function mapSnapshot(row: GameRow, members: GameMemberRow[]): GameSnapshot {
+  const lobbyOrder = row.status === "lobby" && isLobbyTurnOrderState(row.state)
+    ? row.state.seats
+    : null;
+
   return {
     id: row.id,
     code: row.code,
     status: row.status,
     playerCount: normalizePlayerCount(row.player_count),
-    state: row.state,
+    state: playingState(row.state),
     version: row.version,
     members,
+    turnOrder: lobbyOrder,
   };
+}
+
+function resolveTurnOrder(
+  row: GameRow,
+  members: GameMemberRow[],
+  playerCount: PlayerCount,
+): PlayerSeatId[] {
+  const seats = seatsForCount(playerCount);
+  if (isLobbyTurnOrderState(row.state)) {
+    const known = new Set(members.map((member) => member.player_id));
+    const ordered = row.state.seats.filter((seat) => known.has(seat));
+    if (ordered.length === members.length) {
+      return ordered;
+    }
+  }
+  return seats.filter((seat) => members.some((member) => member.player_id === seat));
 }
 
 async function fetchMembers(gameId: string): Promise<GameMemberRow[]> {
@@ -213,7 +246,7 @@ export async function updateGamePlayerCount(
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("games")
-    .update({ player_count: playerCount })
+    .update({ player_count: playerCount, state: null })
     .eq("id", row.id)
     .select("*")
     .maybeSingle();
@@ -258,7 +291,8 @@ export async function startGame(
     );
   }
 
-  const names = seatsForCount(playerCount).map((seat) => {
+  const order = resolveTurnOrder(row, members, playerCount);
+  const names = order.map((seat) => {
     const member = members.find((entry) => entry.player_id === seat);
     return member?.display_name ?? defaultDisplayName(seat);
   });
@@ -267,6 +301,7 @@ export async function startGame(
     type: "START_GAME",
     playerCount,
     playerNames: names,
+    playerIds: order,
   });
 
   const supabase = createAdminClient();
@@ -288,6 +323,49 @@ export async function startGame(
 
   if (!data) {
     throw new GameRepositoryError("Could not start game", 409, "VERSION_CONFLICT");
+  }
+
+  return mapSnapshot(data as GameRow, members);
+}
+
+export async function shuffleTurnOrder(
+  code: string,
+  clientId: string,
+): Promise<GameSnapshot> {
+  const row = await fetchGameByCode(code);
+  const members = await fetchMembers(row.id);
+  const host = members.find((member) => member.player_id === "p1");
+  const playerCount = normalizePlayerCount(row.player_count);
+
+  if (!host || host.client_id !== clientId) {
+    throw new GameRepositoryError("Only the host can shuffle turn order", 403, "FORBIDDEN");
+  }
+  if (row.status !== "lobby") {
+    throw new GameRepositoryError("Game already started", 409, "GAME_STARTED");
+  }
+  if (members.length !== playerCount) {
+    throw new GameRepositoryError("Every seat must be filled before shuffling", 409, "NEED_PLAYERS");
+  }
+
+  const seats = members.map((member) => member.player_id);
+  const lobbyState: LobbyTurnOrderState = {
+    kind: "turn_order",
+    seats: shuffleSeats(seats),
+  };
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("games")
+    .update({ state: lobbyState })
+    .eq("id", row.id)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    throw new GameRepositoryError(error.message, 500);
+  }
+  if (!data) {
+    throw new GameRepositoryError("Could not shuffle turn order", 500);
   }
 
   return mapSnapshot(data as GameRow, members);
@@ -379,7 +457,8 @@ export async function applyGameAction(
     throw new GameRepositoryError("You are not in this game", 403, "FORBIDDEN");
   }
 
-  if (row.status !== "playing" || !row.state) {
+  const currentGame = playingState(row.state);
+  if (row.status !== "playing" || !currentGame) {
     throw new GameRepositoryError("Game is not in progress", 409, "NOT_PLAYING");
   }
 
@@ -389,17 +468,18 @@ export async function applyGameAction(
       code: row.code,
       status: row.status,
       playerCount: normalizePlayerCount(row.player_count),
-      state: row.state,
+      state: currentGame,
       version: row.version,
       members,
+      turnOrder: null,
     });
   }
 
-  assertMemberCanAct(row.state, member, action);
+  assertMemberCanAct(currentGame, member, action);
 
   let nextState: Game;
   try {
-    nextState = reduce(row.state, action);
+    nextState = reduce(currentGame, action);
   } catch (cause) {
     throw new GameRepositoryError(
       cause instanceof Error ? cause.message : "Invalid action",
@@ -429,15 +509,12 @@ export async function applyGameAction(
   if (!data) {
     const latest = await fetchGameByCode(code);
     const latestMembers = await fetchMembers(latest.id);
-    throw new GameRepositoryError("State changed — refresh and retry", 409, "VERSION_CONFLICT", {
-      id: latest.id,
-      code: latest.code,
-      status: latest.status,
-      playerCount: normalizePlayerCount(latest.player_count),
-      state: latest.state,
-      version: latest.version,
-      members: latestMembers,
-    });
+    throw new GameRepositoryError(
+      "State changed — refresh and retry",
+      409,
+      "VERSION_CONFLICT",
+      mapSnapshot(latest, latestMembers),
+    );
   }
 
   return mapSnapshot(data as GameRow, members);

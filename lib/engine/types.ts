@@ -62,11 +62,11 @@ export type Sheet = {
   purple: PurpleSheet;
   /** Activated fox bonuses collected on the sheet. */
   foxes: number;
-  /** Uncrossed +1 action pips remaining. */
+  /** Uncrossed +1 extra-mark actions remaining. */
   plusOnes: number;
   /** Uncrossed reroll actions remaining. */
   rerolls: number;
-  /** Uncrossed extra-die actions remaining. */
+  /** Legacy extra-die count; still spent as +1. */
   extraDice: number;
   /** One-shot line bonuses already collected. */
   claims: SheetClaims;
@@ -155,7 +155,13 @@ export type Effect =
   | { type: "round_black_six" };
 
 export type Action =
-  | { type: "START_GAME"; playerCount: 2 | 3 | 4; playerNames: string[] }
+  | {
+      type: "START_GAME";
+      playerCount: 2 | 3 | 4;
+      playerNames: string[];
+      /** When omitted, seats are assigned p1… in name order. */
+      playerIds?: readonly string[];
+    }
   | {
       type: "ROLL";
       /** Dice values supplied by the caller; engine never rolls. */
@@ -179,9 +185,9 @@ export type Action =
       type: "CROSS";
       playerId: string;
       color: "blue";
-      /** Both dice are required; sum is derived as blueDie + whiteDie. */
-      blueDie: DieValue;
-      whiteDie: DieValue;
+      /** Required for a normal die cross; omitted for a free blue-x bonus. */
+      blueDie?: DieValue;
+      whiteDie?: DieValue;
       targetIndex?: number;
     }
   | { type: "PASSIVE_TAKE"; playerId: string; dieId: string }

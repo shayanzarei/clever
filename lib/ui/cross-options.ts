@@ -44,27 +44,16 @@ function pendingCrossOptions(
     });
   }
 
-  if (
-    head.type === "cross_blue_free" ||
-    head.type === "round_black_x"
-  ) {
-    const live = resolveBlueWhiteValues(game.dice);
-    if (live) {
-      for (const target of getCrossTargets(
-        sheet,
-        "blue",
-        live.blue,
-        live.white,
-      )) {
+  if (head.type === "cross_blue_free" || head.type === "round_black_x") {
+    sheet.blue.boxes.forEach((box, index) => {
+      if (!box.crossed) {
         options.push({
           color: "blue",
-          value: live.blue + live.white,
-          targetIndex: target.index,
-          blueDie: live.blue,
-          whiteDie: live.white,
+          value: box.sum,
+          targetIndex: index,
         });
       }
-    }
+    });
   }
 
   if (head.type === "round_black_x") {
@@ -201,8 +190,9 @@ export function crossActionFromOption(
       type: "CROSS",
       playerId,
       color: "blue",
-      blueDie: option.blueDie!,
-      whiteDie: option.whiteDie!,
+      ...(option.blueDie !== undefined && option.whiteDie !== undefined
+        ? { blueDie: option.blueDie, whiteDie: option.whiteDie }
+        : {}),
       targetIndex: option.targetIndex,
     };
   }

@@ -39,12 +39,17 @@ export function applyRoundStartActions(game: Game, round: number): Game {
   };
 }
 
-/** Begin round 4 — every player must pick black X or black 6. */
+export function isSilverBonusRound(round: number): boolean {
+  return round >= 4;
+}
+
+/** Active player picks silver X or 6, then plays their turn. */
 export function beginRoundFourBonus(game: Game): Game {
+  const activeId = game.players[game.activePlayerIndex]?.id;
   return {
     ...game,
     phase: "round_bonus_choose",
-    roundBonusPendingPlayerIds: game.players.map((player) => player.id),
+    roundBonusPendingPlayerIds: activeId ? [activeId] : [],
   };
 }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   deleteGame,
   getGameSnapshot,
+  shuffleTurnOrder,
   updateGamePlayerCount,
 } from "@/lib/server/game-repository";
 import { jsonError } from "@/lib/server/api-error";
@@ -42,11 +43,21 @@ export async function PATCH(request: Request, context: RouteContext) {
     const body = (await request.json()) as {
       clientId?: string;
       playerCount?: number;
+      shuffleTurnOrder?: boolean;
     };
 
-    if (!body.clientId || body.playerCount === undefined) {
+    if (!body.clientId) {
+      return NextResponse.json({ error: "clientId is required" }, { status: 400 });
+    }
+
+    if (body.shuffleTurnOrder) {
+      const snapshot = await shuffleTurnOrder(code, body.clientId);
+      return NextResponse.json(snapshot);
+    }
+
+    if (body.playerCount === undefined) {
       return NextResponse.json(
-        { error: "clientId and playerCount are required" },
+        { error: "playerCount or shuffleTurnOrder is required" },
         { status: 400 },
       );
     }
