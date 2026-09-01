@@ -29,12 +29,12 @@ export function TurnOrderScreen({
   onStart,
 }: TurnOrderScreenProps) {
   return (
-    <div className="relative flex min-h-dvh w-full flex-col overflow-hidden bg-ink text-white">
+    <div className="relative flex h-dvh w-full flex-col overflow-x-hidden overflow-y-auto bg-ink text-white">
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div className="h-[22rem] w-[22rem] rounded-full border border-dashed border-line/80" />
       </div>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-10">
+      <main className="relative z-10 mx-auto my-auto flex w-full max-w-md flex-col px-6 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))]">
         <p className="text-center text-xs font-bold tracking-[0.2em] text-neon-orange uppercase">
           Establishing turn order
         </p>

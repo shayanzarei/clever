@@ -128,10 +128,31 @@ export function GameBoard({
             </button>
           </div>
         )}
+      </div>
 
-        <div className="game-board__toolbar">
+      <div className="game-board__sheets min-h-0 flex-1">
+        {sheetsToShow.map((player) => {
+          const isActor = actingPlayerId === player.id && canAct;
+          const options = isActor ? crossOptions : [];
+          return (
+            <PlayerSheet
+              key={player.id}
+              title={player.name}
+              sheet={player.sheet}
+              highlight={actingPlayerId === player.id}
+              crossOptions={options}
+              onCross={(option) =>
+                dispatch(crossActionFromOption(player.id, option))
+              }
+            />
+          );
+        })}
+      </div>
+
+      <div className="game-board__toolbar">
           <DiceBoard
             compact
+            hideEmptyLanes
             dice={game.dice}
             clickableIds={clickableDieIds}
             selectedId={
@@ -167,26 +188,6 @@ export function GameBoard({
             extraDieMode={extraDieMode}
             onToggleExtraDie={() => setExtraDieMode((value) => !value)}
           />
-        </div>
-      </div>
-
-      <div className="game-board__sheets min-h-0 flex-1">
-        {sheetsToShow.map((player) => {
-          const isActor = actingPlayerId === player.id && canAct;
-          const options = isActor ? crossOptions : [];
-          return (
-            <PlayerSheet
-              key={player.id}
-              title={player.name}
-              sheet={player.sheet}
-              highlight={actingPlayerId === player.id}
-              crossOptions={options}
-              onCross={(option) =>
-                dispatch(crossActionFromOption(player.id, option))
-              }
-            />
-          );
-        })}
       </div>
     </div>
   );

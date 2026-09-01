@@ -28,19 +28,21 @@ export function GameApp({ onLeave }: { onLeave?: () => void }) {
 
   if (!game && draft) {
     return (
-      <TurnOrderScreen
-        players={draft.names.map((name, index) => ({
-          id: `local-${index}`,
-          name,
-        }))}
-        isHost
-        onShuffle={() =>
-          setDraft((current) =>
-            current ? { ...current, names: shuffleSeats(current.names) } : current,
-          )
-        }
-        onStart={() => startGame(draft.playerCount, draft.names)}
-      />
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <TurnOrderScreen
+          players={draft.names.map((name, index) => ({
+            id: `local-${index}`,
+            name,
+          }))}
+          isHost
+          onShuffle={() =>
+            setDraft((current) =>
+              current ? { ...current, names: shuffleSeats(current.names) } : current,
+            )
+          }
+          onStart={() => startGame(draft.playerCount, draft.names)}
+        />
+      </div>
     );
   }
 

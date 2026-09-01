@@ -24,15 +24,15 @@ export function GameHeader({ game }: GameHeaderProps) {
 
   return (
     <header className="game-header rounded-2xl border border-line bg-surface px-3 py-2">
-      <div>
-        <p className="text-[10px] font-bold tracking-widest text-muted uppercase">
+      <div className="game-header__status">
+        <p className="game-header__round text-[10px] font-bold tracking-widest text-muted uppercase">
           Round {game.round} / {game.maxRounds}
         </p>
-        <h2 className="text-base font-semibold leading-tight text-white">
+        <h2 className="game-header__phase text-base font-semibold leading-tight text-white">
           {PHASE_LABELS[game.phase]}
         </h2>
         {active && game.phase !== "finished" && (
-          <p className="text-xs text-muted">Active: {active.name}</p>
+          <p className="game-header__active text-xs text-muted">Active: {active.name}</p>
         )}
       </div>
 
