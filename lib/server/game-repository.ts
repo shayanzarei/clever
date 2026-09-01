@@ -1,6 +1,7 @@
 import { activePlayerId } from "@/lib/engine/turn";
 import { reduce } from "@/lib/engine/reduce";
 import type { Action, Game } from "@/lib/engine/types";
+import type { ClientAction } from "@/lib/game/client-action";
 import {
   defaultDisplayName,
   isPlayerCount,
@@ -17,6 +18,11 @@ import {
   shuffleSeats,
   type LobbyTurnOrderState,
 } from "@/lib/game/turn-order";
+import {
+  rollHistoryEntry,
+  toEngineAction,
+} from "@/lib/server/client-action";
+import type { RollHistoryEntry } from "@/lib/game/roll-history";
 
 export class GameRepositoryError extends Error {
   constructor(
@@ -424,14 +430,31 @@ export async function deleteGame(code: string, clientId: string): Promise<void> 
   }
 }
 
+function parseRollHistory(value: unknown): RollHistoryEntry[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value as RollHistoryEntry[];
+}
+
 function assertMemberCanAct(
   game: Game,
   member: GameMemberRow,
-  action: Action,
+  action: ClientAction,
 ): void {
   if (action.type === "ROLL") {
     if (member.player_id !== activePlayerId(game)) {
       throw new GameRepositoryError("Not your turn to roll", 403, "FORBIDDEN");
+    }
+    return;
+  }
+
+  if (action.type === "USE_REROLL") {
+    if (member.player_id !== activePlayerId(game)) {
+      throw new GameRepositoryError("Only the active player may reroll", 403, "FORBIDDEN");
+    }
+    if (action.playerId !== member.player_id) {
+      throw new GameRepositoryError("Not your seat", 403, "FORBIDDEN");
     }
     return;
   }
@@ -446,7 +469,7 @@ function assertMemberCanAct(
 export async function applyGameAction(
   code: string,
   clientId: string,
-  action: Action,
+  clientAction: ClientAction,
   expectedVersion: number,
 ): Promise<GameSnapshot> {
   const row = await fetchGameByCode(code);
@@ -475,11 +498,13 @@ export async function applyGameAction(
     });
   }
 
-  assertMemberCanAct(currentGame, member, action);
+  assertMemberCanAct(currentGame, member, clientAction);
+
+  const engineAction = toEngineAction(currentGame, clientAction);
 
   let nextState: Game;
   try {
-    nextState = reduce(currentGame, action);
+    nextState = reduce(currentGame, engineAction);
   } catch (cause) {
     throw new GameRepositoryError(
       cause instanceof Error ? cause.message : "Invalid action",
@@ -487,6 +512,16 @@ export async function applyGameAction(
       "INVALID_ACTION",
     );
   }
+
+  const historyEntry = rollHistoryEntry(
+    clientAction,
+    engineAction,
+    currentGame.version,
+  );
+  const existingHistory = parseRollHistory(row.roll_history);
+  const roll_history = historyEntry
+    ? [...existingHistory, historyEntry]
+    : existingHistory;
 
   const nextStatus = nextState.phase === "finished" ? "finished" : "playing";
   const supabase = createAdminClient();
@@ -496,6 +531,7 @@ export async function applyGameAction(
       status: nextStatus,
       state: nextState,
       version: nextState.version,
+      roll_history,
     })
     .eq("id", row.id)
     .eq("version", expectedVersion)
@@ -519,3 +555,4 @@ export async function applyGameAction(
 
   return mapSnapshot(data as GameRow, members);
 }
+

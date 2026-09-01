@@ -1,15 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { poolDice } from "@/lib/engine/dice";
-import type { Action, Game } from "@/lib/engine/types";
+import type { ClientAction } from "@/lib/game/client-action";
 import { getClientId, getStoredPlayerId, storePlayerId, clearStoredPlayerId } from "@/lib/client/session";
 import { getSupabaseBrowserClient, isSupabaseBrowserConfigured } from "@/lib/supabase/client";
 import type { GameSnapshot } from "@/lib/supabase/types";
 import type { PlayerCount, PlayerSeatId } from "@/lib/game/player-seats";
 import { isPlayerCount } from "@/lib/game/player-seats";
 import { isLobbyTurnOrderState } from "@/lib/game/turn-order";
-import { rollPoolDice } from "@/lib/ui/rolls";
 
 type OnlineGameState = {
   snapshot: GameSnapshot | null;
@@ -215,7 +213,7 @@ export function useOnlineGame(code: string) {
   }, []);
 
   const dispatch = useCallback(
-    async (action: Action) => {
+    async (action: ClientAction) => {
       const snapshot = state.snapshot;
       if (!snapshot?.state) {
         return;
@@ -262,11 +260,8 @@ export function useOnlineGame(code: string) {
     if (!game) {
       return;
     }
-    void dispatch({
-      type: "ROLL",
-      values: rollPoolDice(poolDice(game.dice)),
-    });
-  }, [dispatch, state.snapshot?.state]);
+    void dispatch({ type: "ROLL" });
+  }, [dispatch]);
 
   const shuffleTurnOrder = useCallback(async () => {
     setState((current) => ({

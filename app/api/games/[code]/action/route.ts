@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import type { Action } from "@/lib/engine/types";
 import { applyGameAction } from "@/lib/server/game-repository";
+import { parseClientAction } from "@/lib/server/client-action";
 import { jsonError } from "@/lib/server/api-error";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 
@@ -20,7 +20,7 @@ export async function POST(request: Request, context: RouteContext) {
     const { code } = await context.params;
     const body = (await request.json()) as {
       clientId?: string;
-      action?: Action;
+      action?: unknown;
       expectedVersion?: number;
     };
 
@@ -31,10 +31,20 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
+    let clientAction;
+    try {
+      clientAction = parseClientAction(body.action);
+    } catch (cause) {
+      return NextResponse.json(
+        { error: cause instanceof Error ? cause.message : "Invalid action" },
+        { status: 400 },
+      );
+    }
+
     const snapshot = await applyGameAction(
       code,
       body.clientId,
-      body.action,
+      clientAction,
       body.expectedVersion,
     );
     return NextResponse.json(snapshot);

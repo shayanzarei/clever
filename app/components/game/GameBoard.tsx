@@ -8,6 +8,7 @@ import {
   isActivePlayer,
 } from "@/lib/engine/turn";
 import type { Action, DieState, Game } from "@/lib/engine/types";
+import type { ClientAction } from "@/lib/game/client-action";
 import type { PlayerSeatId } from "@/lib/game/player-seats";
 import {
   crossActionFromOption,
@@ -26,7 +27,7 @@ import { PlayerSheet } from "@/app/components/game/PlayerSheet";
 type GameBoardProps = {
   game: Game;
   error: string | null;
-  dispatch: (action: Action) => void;
+  dispatch: (action: Action | ClientAction) => void;
   roll: () => void;
   clearError: () => void;
   /** When set (online), only this seat may interact. */
@@ -166,13 +167,18 @@ export function GameBoard({
             game={game}
             myPlayerId={myPlayerId}
             onRoll={roll}
-            onReroll={() =>
+            onReroll={() => {
+              const playerId = activePlayerId(game);
+              if (myPlayerId != null) {
+                dispatch({ type: "USE_REROLL", playerId });
+                return;
+              }
               dispatch({
                 type: "USE_REROLL",
-                playerId: activePlayerId(game),
+                playerId,
                 values: rerollValues(game),
-              })
-            }
+              });
+            }}
             onSkipExtra={(playerId) =>
               dispatch({ type: "SKIP_EXTRA_DIE", playerId })
             }
