@@ -81,8 +81,9 @@ describe("score pad interactivity", () => {
     const html = renderPad(game);
 
     expect(html).toContain('aria-label="Blue die plus white die"');
-    expect(html).toContain('fill="#3b82f6"');
-    expect(html).toContain('fill="#e4e4e7"');
-    expect(html).toContain('class="pad-dice-hint__plus"');
+    expect(html).toContain("pad-dice-hint__face");
+    expect(html).toContain("grid-cols-3 grid-rows-3");
+    expect(html).toContain("bg-[#3b82f6]");
+    expect(html).toContain("bg-[#e4e4e7]");
   });
 });

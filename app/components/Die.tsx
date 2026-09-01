@@ -11,6 +11,7 @@ type DieProps = {
   size?: DieSize;
   title?: string;
   disabled?: boolean;
+  className?: string;
   onClick?: () => void;
 };
 
@@ -57,6 +58,7 @@ export function Die({
   size = "md",
   title,
   disabled = false,
+  className = "",
   onClick,
 }: DieProps) {
   const pips = PIP_LAYOUTS[value] ?? [];
@@ -73,7 +75,10 @@ export function Die({
     isHighlighted && !isSelected ? "scale-105 shadow-md" : "",
     interactive ? "cursor-pointer hover:brightness-110" : "",
     disabled && !isUsed ? "opacity-45" : "",
-  ].join(" ");
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const pipColor = isUsed ? "bg-[#3f3f46]" : "bg-[#18181b]";
 

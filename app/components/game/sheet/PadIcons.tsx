@@ -1,4 +1,5 @@
 import type { Effect } from "@/lib/engine/types";
+import { Die } from "@/app/components/Die";
 
 type BonusIconProps = {
   effect: Effect;
@@ -76,22 +77,16 @@ export function BlueDieHint() {
       aria-label="Blue die plus white die"
       title="Blue die + white die"
     >
-      <MiniColorDie color="blue" />
-      <span className="pad-dice-hint__plus">+</span>
-      <MiniColorDie color="white" />
+      <span className="pad-dice-hint__die" aria-hidden>
+        <Die color="blue" value={1} size="sm" className="pad-dice-hint__face" />
+      </span>
+      <span className="pad-dice-hint__plus" aria-hidden>
+        +
+      </span>
+      <span className="pad-dice-hint__die" aria-hidden>
+        <Die color="white" value={1} size="sm" className="pad-dice-hint__face" />
+      </span>
     </span>
-  );
-}
-
-function MiniColorDie({ color }: { color: "blue" | "white" }) {
-  const fill = color === "blue" ? "#3b82f6" : "#e4e4e7";
-  const pip = color === "blue" ? "#ffffff" : "#18181b";
-
-  return (
-    <svg viewBox="0 0 20 20" className="pad-dice-hint__die" aria-hidden>
-      <rect x="1" y="1" width="18" height="18" rx="4" fill={fill} />
-      <circle cx="10" cy="10" r="2.2" fill={pip} />
-    </svg>
   );
 }
 
