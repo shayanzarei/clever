@@ -75,4 +75,14 @@ describe("score pad interactivity", () => {
     expect(html).toContain('data-count="0"');
     expect(html).not.toContain('data-token="extra-die"');
   });
+
+  it("shows blue and white dice in the blue area hint cell", () => {
+    const game = pickDie("die-yellow");
+    const html = renderPad(game);
+
+    expect(html).toContain('aria-label="Blue die plus white die"');
+    expect(html).toContain('fill="#3b82f6"');
+    expect(html).toContain('fill="#e4e4e7"');
+    expect(html).toContain('class="pad-dice-hint__plus"');
+  });
 });

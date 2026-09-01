@@ -71,16 +71,27 @@ function IconContent({ effect }: { effect: Effect }) {
 
 export function BlueDieHint() {
   return (
-    <span className="pad-dice-hint pad-cell pad-cell--hint" aria-hidden title="Blue + white die sum">
-      <svg className="pad-dice-hint__icon" viewBox="0 0 24 24" fill="currentColor">
-        <rect x="3" y="3" width="18" height="18" rx="4" opacity="0.15" />
-        <circle cx="8" cy="8" r="1.5" />
-        <circle cx="16" cy="8" r="1.5" />
-        <circle cx="12" cy="12" r="1.5" />
-        <circle cx="8" cy="16" r="1.5" />
-        <circle cx="16" cy="16" r="1.5" />
-      </svg>
+    <span
+      className="pad-dice-hint pad-cell pad-cell--hint"
+      aria-label="Blue die plus white die"
+      title="Blue die + white die"
+    >
+      <MiniColorDie color="blue" />
+      <span className="pad-dice-hint__plus">+</span>
+      <MiniColorDie color="white" />
     </span>
+  );
+}
+
+function MiniColorDie({ color }: { color: "blue" | "white" }) {
+  const fill = color === "blue" ? "#3b82f6" : "#e4e4e7";
+  const pip = color === "blue" ? "#ffffff" : "#18181b";
+
+  return (
+    <svg viewBox="0 0 20 20" className="pad-dice-hint__die" aria-hidden>
+      <rect x="1" y="1" width="18" height="18" rx="4" fill={fill} />
+      <circle cx="10" cy="10" r="2.2" fill={pip} />
+    </svg>
   );
 }
 
