@@ -479,7 +479,7 @@ function useReroll(
     throw new Error("No reroll actions remaining");
   }
   if (poolDice(game.dice).length === 0) {
-    throw new Error("No pool dice to reroll");
+    return finishActiveTurn(game);
   }
 
   const dice = applyRollValues(game.dice, action.values);
