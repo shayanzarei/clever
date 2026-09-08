@@ -58,7 +58,7 @@ export function GameApp({ onLeave }: { onLeave?: () => void }) {
     if (action.type === "USE_REROLL" && !("values" in action)) {
       return;
     }
-    dispatch(action);
+    dispatch(action as Parameters<typeof dispatch>[0]);
   };
 
   return (
