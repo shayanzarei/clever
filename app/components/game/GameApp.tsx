@@ -1,0 +1,76 @@
+"use client";
+
+import { useState } from "react";
+import { useGameState } from "@/app/hooks/useGameState";
+import { GameBoard } from "@/app/components/game/GameBoard";
+import { Lobby } from "@/app/components/game/Lobby";
+import { TurnOrderScreen } from "@/app/components/game/TurnOrderScreen";
+import { shuffleSeats } from "@/lib/game/turn-order";
+import type { ClientAction } from "@/lib/game/client-action";
+import type { PlayerCount } from "@/lib/game/player-seats";
+
+export function GameApp({ onLeave }: { onLeave?: () => void }) {
+  const { game, error, dispatch, startGame, roll, clearError } = useGameState();
+  const [draft, setDraft] = useState<{
+    playerCount: PlayerCount;
+    names: string[];
+  } | null>(null);
+
+  if (!game && !draft) {
+    return (
+      <Lobby
+        onStart={(playerCount, names) => {
+          setDraft({ playerCount, names: shuffleSeats(names) });
+        }}
+        onBack={onLeave ?? (() => undefined)}
+      />
+    );
+  }
+
+  if (!game && draft) {
+    return (
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <TurnOrderScreen
+          players={draft.names.map((name, index) => ({
+            id: `local-${index}`,
+            name,
+          }))}
+          isHost
+          onShuffle={() =>
+            setDraft((current) =>
+              current ? { ...current, names: shuffleSeats(current.names) } : current,
+            )
+          }
+          onStart={() => startGame(draft.playerCount, draft.names)}
+        />
+      </div>
+    );
+  }
+
+  if (!game) {
+    return null;
+  }
+
+  const dispatchFromBoard = (action: ClientAction) => {
+    if (action.type === "ROLL") {
+      return;
+    }
+    if (action.type === "USE_REROLL" && !("values" in action)) {
+      return;
+    }
+    dispatch(action as Parameters<typeof dispatch>[0]);
+  };
+
+  return (
+    <div className="app-shell--play flex min-h-0 flex-1 flex-col">
+      <GameBoard
+        game={game}
+        error={error}
+        dispatch={dispatchFromBoard}
+        roll={roll}
+        clearError={clearError}
+        onLeave={onLeave}
+      />
+    </div>
+  );
+}
