@@ -103,7 +103,7 @@ describe("rule: X-bonus marks a box in the matching color area", () => {
 
   it("lets a free blue bonus mark any uncrossed sum box", () => {
     let game = startGame();
-    const sheet = crossYellowRow0(createEmptySheet());
+    let sheet = crossYellowRow0(createEmptySheet());
     game = {
       ...game,
       players: [{ ...game.players[0], sheet }, game.players[1]],

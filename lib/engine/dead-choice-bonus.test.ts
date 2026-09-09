@@ -191,7 +191,7 @@ describe("partially dead multi-area choice bonuses", () => {
   });
 
   it("does not offer green for round_black_x when green is full", () => {
-    const sheet = crossAllGreen(createEmptySheet());
+    let sheet = crossAllGreen(createEmptySheet());
     const game = gameWithPending(sheet, { type: "round_black_x" });
 
     const options = getSheetCrossOptions(game, "p1");
