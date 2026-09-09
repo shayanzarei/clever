@@ -199,14 +199,14 @@ describe("canCross purple", () => {
   });
 
   it("requires strictly increasing values after the first box", () => {
-    let sheet = fillPurpleThrough(createEmptySheet(), [2]);
+    const sheet = fillPurpleThrough(createEmptySheet(), [2]);
     expect(canCross(sheet, "purple", 2)).toBe(false);
     expect(canCross(sheet, "purple", 3)).toBe(true);
     expect(getCrossTargets(sheet, "purple", 3)).toEqual([{ index: 1 }]);
   });
 
   it("resets the chain after a recorded 6 (official rule)", () => {
-    let sheet = fillPurpleThrough(createEmptySheet(), [2, 5, 6]);
+    const sheet = fillPurpleThrough(createEmptySheet(), [2, 5, 6]);
     expect(canCross(sheet, "purple", 2)).toBe(true);
     expect(canCross(sheet, "purple", 1)).toBe(true);
     expect(getCrossTargets(sheet, "purple", 3)).toEqual([{ index: 3 }]);

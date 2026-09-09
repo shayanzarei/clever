@@ -1,5 +1,5 @@
 import { poolDice } from "@/lib/engine/dice";
-import type { Game } from "@/lib/engine/types";
+import type { Action, Game } from "@/lib/engine/types";
 import type { ClientAction } from "@/lib/game/client-action";
 import type { RollHistoryEntry } from "@/lib/game/roll-history";
 import { rollPoolDiceSecure } from "@/lib/server/secure-roll";
@@ -70,7 +70,7 @@ export function rollHistoryEntry(
     action: engineAction.type,
     playerId:
       clientAction.type === "USE_REROLL" ? clientAction.playerId : undefined,
-    values: engineAction.values,
+    values: [...engineAction.values],
     gameVersion,
   };
 }
