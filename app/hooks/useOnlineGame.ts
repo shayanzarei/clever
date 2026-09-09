@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Game } from "@/lib/engine/types";
 import type { ClientAction } from "@/lib/game/client-action";
 import { getClientId, getStoredPlayerId, storePlayerId, clearStoredPlayerId } from "@/lib/client/session";
 import { getSupabaseBrowserClient, isSupabaseBrowserConfigured } from "@/lib/supabase/client";
