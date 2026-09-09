@@ -67,7 +67,7 @@ describe("rule: purple track left to right without skipping", () => {
   });
 
   it("advances one slot at a time in order", () => {
-    let sheet = fillPurpleAt(createEmptySheet(), 0, 2);
+    const sheet = fillPurpleAt(createEmptySheet(), 0, 2);
     expect(nextPurpleIndex(sheet)).toBe(1);
     expect(getCrossTargets(sheet, "purple", 5)).toEqual([{ index: 1 }]);
   });
