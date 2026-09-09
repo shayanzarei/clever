@@ -7,6 +7,7 @@ import { Lobby } from "@/app/components/game/Lobby";
 import { TurnOrderScreen } from "@/app/components/game/TurnOrderScreen";
 import { shuffleSeats } from "@/lib/game/turn-order";
 import type { PlayerCount } from "@/lib/game/player-seats";
+import type { Action } from "@/lib/engine/types";
 
 export function GameApp({ onLeave }: { onLeave?: () => void }) {
   const { game, error, dispatch, startGame, roll, clearError } = useGameState();
@@ -55,7 +56,7 @@ export function GameApp({ onLeave }: { onLeave?: () => void }) {
       <GameBoard
         game={game}
         error={error}
-        dispatch={dispatch}
+        dispatch={(action) => dispatch(action as Action)}
         roll={roll}
         clearError={clearError}
         onLeave={onLeave}
