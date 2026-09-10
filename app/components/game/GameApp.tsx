@@ -6,8 +6,8 @@ import { GameBoard } from "@/app/components/game/GameBoard";
 import { Lobby } from "@/app/components/game/Lobby";
 import { TurnOrderScreen } from "@/app/components/game/TurnOrderScreen";
 import { shuffleSeats } from "@/lib/game/turn-order";
-import type { ClientAction } from "@/lib/game/client-action";
 import type { PlayerCount } from "@/lib/game/player-seats";
+import type { Action } from "@/lib/engine/types";
 
 export function GameApp({ onLeave }: { onLeave?: () => void }) {
   const { game, error, dispatch, startGame, roll, clearError } = useGameState();
@@ -51,22 +51,12 @@ export function GameApp({ onLeave }: { onLeave?: () => void }) {
     return null;
   }
 
-  const dispatchFromBoard = (action: ClientAction) => {
-    if (action.type === "ROLL") {
-      return;
-    }
-    if (action.type === "USE_REROLL" && !("values" in action)) {
-      return;
-    }
-    dispatch(action as Parameters<typeof dispatch>[0]);
-  };
-
   return (
     <div className="app-shell--play flex min-h-0 flex-1 flex-col">
       <GameBoard
         game={game}
         error={error}
-        dispatch={dispatchFromBoard}
+        dispatch={(action) => dispatch(action as Action)}
         roll={roll}
         clearError={clearError}
         onLeave={onLeave}

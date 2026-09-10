@@ -286,33 +286,6 @@ describe("rule: reroll action", () => {
     expect(game.players[0].sheet.rerolls).toBe(0);
     expect(game.dice.every((die) => die.value === 5)).toBe(true);
   });
-
-  it("finishes the active turn instead of erroring when no pool dice remain", () => {
-    let game = startGame();
-    game = {
-      ...game,
-      phase: "active_choose",
-      activeRollCount: 2,
-      players: game.players.map((player, index) =>
-        index === 0
-          ? {
-              ...player,
-              sheet: sheetWithPlusOnes(sheetWithRerolls(player.sheet, 1), 1),
-            }
-          : player,
-      ),
-      dice: game.dice.map((die) => ({ ...die, location: "tray" as const })),
-    };
-
-    game = reduce(game, {
-      type: "USE_REROLL",
-      playerId: "p1",
-      values: [],
-    });
-
-    expect(game.phase).toBe("active_extra");
-    expect(game.players[0].sheet.rerolls).toBe(1);
-  });
 });
 
 describe("rule: extra die (+1) action", () => {

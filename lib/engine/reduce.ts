@@ -178,7 +178,7 @@ function beginPassivePhase(game: Game): Game {
 }
 
 function finishActiveTurn(game: Game): Game {
-  const next = bump(
+  let next = bump(
     { ...game, dice: moveRemainingPoolToTray(game.dice) },
     {},
   );
@@ -190,8 +190,8 @@ function finishActiveTurn(game: Game): Game {
   return beginPassivePhase(next);
 }
 
-function finishActiveChoice(game: Game): Game {
-  const next: Game = bump(game, {
+function finishActiveChoice(game: Game, playerId: string): Game {
+  let next: Game = bump(game, {
     activeRollCount: game.activeRollCount + 1,
     awaitingCross: null,
   });
@@ -207,7 +207,7 @@ function finishActiveChoice(game: Game): Game {
 
 function completePassivePlayer(game: Game, playerId: string): Game {
   const completed = [...game.passiveCompletedPlayerIds, playerId];
-  const next = bump(game, { passiveCompletedPlayerIds: completed });
+  let next = bump(game, { passiveCompletedPlayerIds: completed });
 
   if (allPassivesCompleted(next)) {
     return bump(advanceTurn(next), {});
@@ -217,7 +217,7 @@ function completePassivePlayer(game: Game, playerId: string): Game {
 }
 
 function finishPassiveChoice(game: Game, playerId: string): Game {
-  const next = updatePlayer(game, playerId, { passiveDieId: null });
+  let next = updatePlayer(game, playerId, { passiveDieId: null });
 
   if (extraDieActionsAvailable(next, playerId) > 0) {
     return bump(next, { phase: "passive_extra" });
@@ -233,7 +233,7 @@ function finishExtraDieCross(game: Game, playerId: string): Game {
   }
 
   const player = getPlayer(game, playerId);
-  const next = bump(
+  let next = bump(
     updatePlayer(game, playerId, { sheet: consumeExtraDie(player.sheet) }),
     {
       awaitingCross: null,
@@ -263,7 +263,7 @@ function finishCross(
   triggered: Effect[],
 ): Game {
   const resume = resumePhaseAfterCross(game);
-  const next = settleBonusChain(game, playerId, sheet, triggered, resume);
+  let next = settleBonusChain(game, playerId, sheet, triggered, resume);
 
   if (next.pending.length > 0) {
     return next;
@@ -277,7 +277,7 @@ function finishCross(
     next.awaitingCross?.slotIndex !== undefined &&
     next.awaitingCross.playerId === playerId
   ) {
-    return finishActiveChoice(next);
+    return finishActiveChoice(next, playerId);
   }
 
   const player = getPlayer(next, playerId);
@@ -457,7 +457,7 @@ function passiveTake(
   return bump(updatePlayer(game, action.playerId, { passiveDieId: action.dieId }), {});
 }
 
-function spendReroll(
+function useReroll(
   game: Game,
   action: Extract<Action, { type: "USE_REROLL" }>,
 ): Game {
@@ -479,7 +479,7 @@ function spendReroll(
     throw new Error("No reroll actions remaining");
   }
   if (poolDice(game.dice).length === 0) {
-    return finishActiveTurn(game);
+    throw new Error("No pool dice to reroll");
   }
 
   const dice = applyRollValues(game.dice, action.values);
@@ -492,18 +492,18 @@ function spendReroll(
   );
 }
 
-function spendPlusOne(
+function usePlusOne(
   game: Game,
   action: Extract<Action, { type: "USE_PLUS_ONE" }>,
 ): Game {
-  return spendExtraDie(game, {
+  return useExtraDie(game, {
     type: "USE_EXTRA_DIE",
     playerId: action.playerId,
     dieId: action.dieId,
   });
 }
 
-function spendExtraDie(
+function useExtraDie(
   game: Game,
   action: Extract<Action, { type: "USE_EXTRA_DIE" }>,
 ): Game {
@@ -554,7 +554,7 @@ function skipRoll(
     throw new Error("At least one pool die can still be marked");
   }
 
-  return finishActiveChoice(game);
+  return finishActiveChoice(game, action.playerId);
 }
 
 function skipExtraDie(
@@ -913,11 +913,11 @@ export function reduce(state: Game, action: Action): Game {
     case "UNDO_DIE_CHOICE":
       return undoDieChoice(game, action);
     case "USE_REROLL":
-      return spendReroll(game, action);
+      return useReroll(game, action);
     case "USE_PLUS_ONE":
-      return spendPlusOne(game, action);
+      return usePlusOne(game, action);
     case "USE_EXTRA_DIE":
-      return spendExtraDie(game, action);
+      return useExtraDie(game, action);
     case "SKIP_EXTRA_DIE":
       return skipExtraDie(game, action);
     case "SKIP_ROLL":
