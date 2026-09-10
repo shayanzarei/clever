@@ -1,6 +1,6 @@
 import { activePlayerId } from "@/lib/engine/turn";
 import { reduce } from "@/lib/engine/reduce";
-import type { Game } from "@/lib/engine/types";
+import type { Action, Game } from "@/lib/engine/types";
 import type { ClientAction } from "@/lib/game/client-action";
 import {
   defaultDisplayName,
@@ -555,3 +555,4 @@ export async function applyGameAction(
 
   return mapSnapshot(data as GameRow, members);
 }
+

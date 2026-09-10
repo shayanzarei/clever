@@ -67,9 +67,7 @@ export function ActionBar({
         canAct &&
         active &&
         !game.awaitingCross &&
-        active.sheet.rerolls > 0 &&
-        poolDice(game.dice).length > 0 &&
-        !canSkipActiveRoll(game, viewingPlayerId ?? activeId) && (
+        active.sheet.rerolls > 0 && (
           <button type="button" className="hud-btn" onClick={onReroll}>
             Reroll ×{active.sheet.rerolls}
           </button>
