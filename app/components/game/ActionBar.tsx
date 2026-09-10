@@ -67,7 +67,8 @@ export function ActionBar({
         canAct &&
         active &&
         !game.awaitingCross &&
-        active.sheet.rerolls > 0 && (
+        active.sheet.rerolls > 0 &&
+        poolDice(game.dice).length > 0 && (
           <button type="button" className="hud-btn" onClick={onReroll}>
             Reroll ×{active.sheet.rerolls}
           </button>
@@ -84,7 +85,7 @@ export function ActionBar({
             className="hud-btn"
             onClick={() => onSkipRoll(viewingPlayerId)}
           >
-            Pass roll
+            {skipActiveRollLabel(game, viewingPlayerId)}
           </button>
         )}
 
@@ -301,6 +302,15 @@ function ThinkingNotice({ names }: { names: string[] }) {
       {label}
     </p>
   );
+}
+
+function skipActiveRollLabel(game: Game, playerId: string): string {
+  const player = game.players.find((entry) => entry.id === playerId);
+  const slotsFull = Boolean(player?.diceSlots.every((slot) => slot !== null));
+  if (poolDice(game.dice).length === 0 || slotsFull) {
+    return "Finish turn";
+  }
+  return "Pass roll";
 }
 
 function canUndoChoice(game: Game, playerId: string | null): boolean {

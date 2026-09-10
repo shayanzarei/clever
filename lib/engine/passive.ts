@@ -68,7 +68,18 @@ export function canSkipActiveRoll(game: Game, playerId: string): boolean {
   if (!isActivePlayer(game, playerId)) {
     return false;
   }
-  return poolDice(game.dice).length > 0 && !poolDiceHasLegalCross(game, playerId);
+  const player = game.players.find((entry) => entry.id === playerId);
+  if (!player) {
+    return false;
+  }
+  const pool = poolDice(game.dice);
+  if (pool.length === 0) {
+    return true;
+  }
+  if (player.diceSlots.every((slot) => slot !== null)) {
+    return true;
+  }
+  return !poolDiceHasLegalCross(game, playerId);
 }
 
 /** True when the tray holds a die this passive player can legally use. */

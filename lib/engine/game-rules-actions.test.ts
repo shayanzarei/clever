@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { poolDice } from "./dice";
-import { applyPassiveBonus } from "./apply";
+import { applyPassiveBonus, applyYellowCross } from "./apply";
 import {
   consumePlusOne,
   consumeReroll,
@@ -454,4 +454,125 @@ describe("rule: extra die (+1) action", () => {
     expect(game.players[1].sheet.plusOnes).toBe(0);
     expect(game.players[1].sheet.orange.boxes[0].value).toBe(5);
   });
+
+  it("stays in extra-die phase after a +1 mark that unlocks a choice bonus", () => {
+    let game = extraDieYellowRowBonusGame(2);
+
+    game = reduce(game, {
+      type: "USE_EXTRA_DIE",
+      playerId: "p1",
+      dieId: "die-yellow",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "yellow",
+      value: 5,
+      targetIndex: 2,
+    });
+
+    expect(game.phase).toBe("resolve_pending");
+    expect(game.pending[0]).toEqual({ type: "cross_blue_free" });
+
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "blue",
+      targetIndex: 0,
+    });
+
+    expect(game.phase).toBe("active_extra");
+    expect(game.players[0].sheet.plusOnes).toBe(1);
+    expect(poolDice(game.dice)).toHaveLength(0);
+    expect(game.awaitingCross).toBeNull();
+  });
+
+  it("hands off to passives after the last +1 mark unlocks a choice bonus", () => {
+    let game = extraDieYellowRowBonusGame(1);
+
+    game = reduce(game, {
+      type: "USE_EXTRA_DIE",
+      playerId: "p1",
+      dieId: "die-yellow",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "yellow",
+      value: 5,
+      targetIndex: 2,
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "blue",
+      targetIndex: 0,
+    });
+
+    expect(game.phase).toBe("passive_choose");
+    expect(game.players[0].sheet.plusOnes).toBe(0);
+  });
+
+  it("keeps a passive player in extra-die phase after a +1 bonus chain", () => {
+    let game = completeActiveTurn(startGame());
+    game = {
+      ...game,
+      players: game.players.map((player, index) =>
+        index === 1
+          ? {
+              ...player,
+              sheet: sheetWithPlusOnes(sheetReadyForYellowRowBonus(), 2),
+            }
+          : player,
+      ),
+      dice: game.dice.map((die) =>
+        die.color === "yellow" ? { ...die, value: 5 as const } : die,
+      ),
+    };
+
+    game = reduce(game, {
+      type: "USE_EXTRA_DIE",
+      playerId: "p2",
+      dieId: "die-yellow",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p2",
+      color: "yellow",
+      value: 5,
+      targetIndex: 2,
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p2",
+      color: "blue",
+      targetIndex: 0,
+    });
+
+    expect(game.phase).toBe("passive_extra");
+    expect(game.players[1].sheet.plusOnes).toBe(1);
+  });
 });
+
+function sheetReadyForYellowRowBonus() {
+  return applyYellowCross(applyYellowCross(createEmptySheet(), 0).sheet, 1)
+    .sheet;
+}
+
+function extraDieYellowRowBonusGame(plusOnes: number): Game {
+  const sheet = sheetWithPlusOnes(sheetReadyForYellowRowBonus(), plusOnes);
+  let game = startGame();
+  game = {
+    ...game,
+    players: game.players.map((player, index) =>
+      index === 0 ? { ...player, sheet } : player,
+    ),
+  };
+  game = completeActiveTurn(game, { skipPlusOne: false });
+  return {
+    ...game,
+    dice: game.dice.map((die) =>
+      die.color === "yellow" ? { ...die, value: 5 as const } : die,
+    ),
+  };
+}
