@@ -28,7 +28,7 @@ import {
   returnDieToPool,
   trayedByChoice,
 } from "./dice";
-import { poolDiceHasLegalCross, validatePassiveTake } from "./passive";
+import { canSkipActiveRoll, validatePassiveTake } from "./passive";
 import {
   beginRoundFourBonus,
   roundBonusEffect,
@@ -118,6 +118,11 @@ function settleBonusChain(
 }
 
 function resumePhaseAfterCross(game: Game): GamePhase {
+  if (game.awaitingCross?.extraDieId) {
+    return isActivePlayer(game, game.awaitingCross.playerId)
+      ? "active_extra"
+      : "passive_extra";
+  }
   if (game.awaitingCross) {
     if (game.phase === "active_extra" || game.phase === "passive_extra") {
       return game.phase;
@@ -249,7 +254,7 @@ function finishExtraDieCross(game: Game, playerId: string): Game {
     return next;
   }
 
-  if (game.phase === "active_extra") {
+  if (isActivePlayer(next, playerId)) {
     return beginPassivePhase(next);
   }
 
@@ -547,11 +552,14 @@ function skipRoll(
   if (game.pending.length > 0) {
     throw new Error("Cannot skip roll while effects are pending");
   }
-  if (poolDice(game.dice).length === 0) {
-    throw new Error("No pool dice to skip");
-  }
-  if (poolDiceHasLegalCross(game, action.playerId)) {
+  if (!canSkipActiveRoll(game, action.playerId)) {
     throw new Error("At least one pool die can still be marked");
+  }
+
+  const player = getPlayer(game, action.playerId);
+  const slotsFull = player.diceSlots.every((slot) => slot !== null);
+  if (poolDice(game.dice).length === 0 || slotsFull) {
+    return finishActiveTurn(game);
   }
 
   return finishActiveChoice(game, action.playerId);

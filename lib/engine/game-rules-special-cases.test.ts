@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { poolDice } from "./dice";
 import {
+  canSkipActiveRoll,
   dieHasLegalCross,
   mayUseActiveSlotFallback,
   trayHasUsableDie,
@@ -234,5 +235,54 @@ describe("special case: active player cannot use any rolled die", () => {
     expect(game.activeRollCount).toBe(3);
     expect(game.phase).toBe("passive_choose");
     expect(poolDice(game.dice)).toHaveLength(0);
+  });
+
+  it("lets the active player finish when three dice are placed and the pool is empty", () => {
+    let game = startGame();
+    game = {
+      ...game,
+      phase: "active_choose",
+      activeRollCount: 3,
+      awaitingCross: null,
+      pending: [],
+      players: game.players.map((player, index) =>
+        index === 0
+          ? {
+              ...player,
+              diceSlots: [
+                { color: "yellow", value: 1 },
+                { color: "orange", value: 1 },
+                { color: "green", value: 6 },
+              ],
+              sheet: {
+                ...player.sheet,
+                rerolls: 3,
+                rerollsEarned: 3,
+                plusOnes: 1,
+                plusOnesEarned: 1,
+              },
+            }
+          : player,
+      ),
+      dice: game.dice.map((die) =>
+        die.color === "yellow"
+          ? { ...die, location: "slot" as const, slotIndex: 0, value: 1 as const }
+          : die.color === "orange"
+            ? { ...die, location: "slot" as const, slotIndex: 1, value: 1 as const }
+            : die.color === "green"
+              ? { ...die, location: "slot" as const, slotIndex: 2, value: 6 as const }
+              : { ...die, location: "tray" as const },
+      ),
+    };
+
+    expect(canSkipActiveRoll(game, "p1")).toBe(true);
+    expect(() =>
+      reduce(game, { type: "USE_REROLL", playerId: "p1", values: [] }),
+    ).toThrow("No pool dice to reroll");
+
+    game = reduce(game, { type: "SKIP_ROLL", playerId: "p1" });
+    expect(game.phase).toBe("active_extra");
+    expect(game.players[0].sheet.plusOnes).toBe(1);
+    expect(game.players[0].sheet.rerolls).toBe(3);
   });
 });
