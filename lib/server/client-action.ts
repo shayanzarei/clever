@@ -70,7 +70,7 @@ export function rollHistoryEntry(
     action: engineAction.type,
     playerId:
       clientAction.type === "USE_REROLL" ? clientAction.playerId : undefined,
-    values: engineAction.values,
+    values: [...engineAction.values],
     gameVersion,
   };
 }
