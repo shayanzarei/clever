@@ -95,9 +95,10 @@ function completeActiveTurn(
 }
 
 describe("round-start bonuses", () => {
-  it("grants a reroll action to all players at round 1", () => {
+  it("grants a reroll action to the starting player at round 1", () => {
     const game = startGame();
-    expect(game.players.every((player) => player.sheet.rerolls === 1)).toBe(true);
+    expect(game.players[0].sheet.rerolls).toBe(1);
+    expect(game.players[1].sheet.rerolls).toBe(0);
     expect(game.players.every((player) => player.sheet.plusOnes === 0)).toBe(true);
   });
 
@@ -133,6 +134,39 @@ describe("round-start bonuses", () => {
         choice: "black_six",
       }),
     ).toThrow("CHOOSE_ROUND_BONUS is only allowed during round_bonus_choose");
+  });
+
+  it("lets the active player undo Black X or Black 6 and pick again", () => {
+    let game = beginRoundFourBonus({ ...startGame(), round: 4 });
+    game = reduce(game, {
+      type: "CHOOSE_ROUND_BONUS",
+      playerId: "p1",
+      choice: "black_x",
+    });
+    expect(game.pending[0]).toEqual({ type: "round_black_x" });
+
+    game = reduce(game, { type: "UNDO_ROUND_BONUS", playerId: "p1" });
+    expect(game.phase).toBe("round_bonus_choose");
+    expect(game.pending).toEqual([]);
+    expect(game.roundBonusPendingPlayerIds).toEqual(["p1"]);
+    expect(game.players[0].sheet.yellow.grid[0][0].crossed).toBe(false);
+
+    game = reduce(game, {
+      type: "CHOOSE_ROUND_BONUS",
+      playerId: "p1",
+      choice: "black_six",
+    });
+    expect(game.pending[0]).toEqual({ type: "round_black_six" });
+
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "orange",
+      value: 6,
+    });
+    expect(() =>
+      reduce(game, { type: "UNDO_ROUND_BONUS", playerId: "p1" }),
+    ).toThrow("UNDO_ROUND_BONUS is only allowed before the bonus is marked");
   });
 
   it("does not wait for the other player after a leftover all-player queue", () => {

@@ -197,6 +197,8 @@ export type Action =
   | { type: "PASSIVE_TAKE"; playerId: string; dieId: string }
   /** Take back a die selection that has not been marked on the sheet yet. */
   | { type: "UNDO_DIE_CHOICE"; playerId: string }
+  /** Take back a round-4 Black X / Black 6 pick that has not been marked yet. */
+  | { type: "UNDO_ROUND_BONUS"; playerId: string }
   | {
       type: "USE_REROLL";
       playerId: string;

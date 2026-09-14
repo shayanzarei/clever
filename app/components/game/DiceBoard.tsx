@@ -34,7 +34,7 @@ export function DiceBoard({
         value={die.value}
         size={compact ? "sm" : "md"}
         title={`${die.color} ${die.value}`}
-        isSelected={selectedId === die.id || die.location === "slot"}
+        isSelected={selectedId === die.id}
         isHighlighted={clickable}
         isUsed={die.location === "consumed"}
         disabled={!clickable}

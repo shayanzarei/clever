@@ -31,6 +31,7 @@ import {
 import { canSkipActiveRoll, validatePassiveTake } from "./passive";
 import {
   beginRoundFourBonus,
+  isRoundBonusEffect,
   roundBonusEffect,
 } from "./round-start";
 import { consumeExtraDie, consumeReroll } from "./sheet-actions";
@@ -633,6 +634,32 @@ function chooseRoundBonus(
   );
 }
 
+function undoRoundBonus(
+  game: Game,
+  action: Extract<Action, { type: "UNDO_ROUND_BONUS" }>,
+): Game {
+  if (!isRoundBonusEffect(game.pending[0]) || game.pending.length !== 1) {
+    throw new Error("UNDO_ROUND_BONUS is only allowed before the bonus is marked");
+  }
+  if (game.pendingPlayerId !== action.playerId) {
+    throw new Error("Only the choosing player may undo the round bonus");
+  }
+  if (game.awaitingCross) {
+    throw new Error("Cannot undo the round bonus after a die has been picked");
+  }
+
+  const pendingIds = game.roundBonusPendingPlayerIds.includes(action.playerId)
+    ? game.roundBonusPendingPlayerIds
+    : [action.playerId, ...game.roundBonusPendingPlayerIds];
+
+  return bump(game, {
+    phase: "round_bonus_choose",
+    pending: [],
+    pendingPlayerId: null,
+    roundBonusPendingPlayerIds: pendingIds,
+  });
+}
+
 function crossDuringPending(
   game: Game,
   action: Extract<Action, { type: "CROSS"; color: ColorArea }>,
@@ -932,6 +959,8 @@ export function reduce(state: Game, action: Action): Game {
       return skipRoll(game, action);
     case "CHOOSE_ROUND_BONUS":
       return chooseRoundBonus(game, action);
+    case "UNDO_ROUND_BONUS":
+      return undoRoundBonus(game, action);
     case "CROSS": {
       if (game.pending.length > 0) {
         if (game.pendingPlayerId !== action.playerId) {

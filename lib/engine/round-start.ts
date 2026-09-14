@@ -23,16 +23,19 @@ function applyActionGrant(player: Player, grant: "plus_one" | "reroll"): Player 
   return { ...player, sheet };
 }
 
-/** Apply automatic round-start action grants (rounds 1–3). */
+/** Grant the round-tracker action to the active player (rounds 1–3). */
 export function applyRoundStartActions(game: Game, round: number): Game {
   if (round > 3) {
     return game;
   }
 
   const grant = ROUND_START_ACTIONS[round as 1 | 2 | 3];
+  const activeIndex = game.activePlayerIndex;
   return {
     ...game,
-    players: game.players.map((player) => applyActionGrant(player, grant)),
+    players: game.players.map((player, index) =>
+      index === activeIndex ? applyActionGrant(player, grant) : player,
+    ),
   };
 }
 
@@ -54,6 +57,12 @@ export function roundBonusEffect(choice: RoundBonusChoice): Effect {
   return choice === "black_x"
     ? { type: "round_black_x" }
     : { type: "round_black_six" };
+}
+
+export function isRoundBonusEffect(
+  effect: Effect | undefined,
+): effect is Extract<Effect, { type: "round_black_x" | "round_black_six" }> {
+  return effect?.type === "round_black_x" || effect?.type === "round_black_six";
 }
 
 export function allRoundBonusesChosen(game: Game): boolean {
