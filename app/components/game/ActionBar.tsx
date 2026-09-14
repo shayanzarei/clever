@@ -142,13 +142,8 @@ export function ActionBar({
       {game.phase === "round_bonus_choose" &&
         game.roundBonusPendingPlayerIds
           .filter((playerId) => !myPlayerId || playerId === myPlayerId)
-          .map((playerId) => {
-          const player = game.players.find((entry) => entry.id === playerId);
-          return (
+          .map((playerId) => (
             <div key={playerId} className="flex flex-wrap gap-2">
-              <span className="self-center text-sm text-muted">
-                {player?.name}: silver X or 6, then finish your turn
-              </span>
               <button
                 type="button"
                 className="hud-btn"
@@ -164,8 +159,7 @@ export function ActionBar({
                 Black 6
               </button>
             </div>
-          );
-        })}
+          ))}
 
       {canAct && canUndoChoice(game, viewingPlayerId) && (
         <button
@@ -173,7 +167,7 @@ export function ActionBar({
           className="hud-btn"
           onClick={() => viewingPlayerId && onUndoChoice(viewingPlayerId)}
         >
-          Undo pick
+          Undo
         </button>
       )}
 
@@ -314,7 +308,13 @@ function skipActiveRollLabel(game: Game, playerId: string): string {
 }
 
 function canUndoChoice(game: Game, playerId: string | null): boolean {
-  if (!playerId || game.pending.length > 0) {
+  if (!playerId) {
+    return false;
+  }
+  if (canUndoRoundBonus(game, playerId)) {
+    return true;
+  }
+  if (game.pending.length > 0) {
     return false;
   }
   if (game.awaitingCross) {
@@ -322,6 +322,16 @@ function canUndoChoice(game: Game, playerId: string | null): boolean {
   }
   const player = game.players.find((entry) => entry.id === playerId);
   return Boolean(player?.passiveDieId);
+}
+
+function canUndoRoundBonus(game: Game, playerId: string): boolean {
+  const head = game.pending[0];
+  return (
+    game.pending.length === 1 &&
+    game.pendingPlayerId === playerId &&
+    (head?.type === "round_black_x" || head?.type === "round_black_six") &&
+    !game.awaitingCross
+  );
 }
 
 export function rerollValues(game: Game) {

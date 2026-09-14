@@ -14,6 +14,7 @@ import {
   crossActionFromOption,
   getSheetCrossOptions,
 } from "@/lib/ui/cross-options";
+import { extraDieClickableIds } from "@/lib/ui/extra-die-targets";
 import {
   ActionBar,
   rerollValues,
@@ -157,7 +158,9 @@ export function GameBoard({
             dice={game.dice}
             clickableIds={clickableDieIds}
             selectedId={
-              game.players.find((player) => player.id === actingPlayerId)?.passiveDieId ??
+              game.awaitingCross?.extraDieId ??
+              game.players.find((player) => player.id === actingPlayerId)
+                ?.passiveDieId ??
               null
             }
             onDieClick={clickableDieIds.size > 0 ? handleDieClick : undefined}
@@ -185,9 +188,17 @@ export function GameBoard({
             onSkipRoll={(playerId) =>
               dispatch({ type: "SKIP_ROLL", playerId })
             }
-            onUndoChoice={(playerId) =>
-              dispatch({ type: "UNDO_DIE_CHOICE", playerId })
-            }
+            onUndoChoice={(playerId) => {
+              const head = game.pending[0];
+              if (
+                head?.type === "round_black_x" ||
+                head?.type === "round_black_six"
+              ) {
+                dispatch({ type: "UNDO_ROUND_BONUS", playerId });
+                return;
+              }
+              dispatch({ type: "UNDO_DIE_CHOICE", playerId });
+            }}
             onRoundBonus={(playerId, choice) =>
               dispatch({ type: "CHOOSE_ROUND_BONUS", playerId, choice })
             }
@@ -205,7 +216,7 @@ function getClickableDice(
   extraDieMode: boolean,
 ): string[] {
   if (extraDieMode || isExtraDiePickPhase(game)) {
-    return extraDieTargets(game);
+    return extraDieClickableIds(game);
   }
 
   if (game.phase === "active_choose" && isActivePlayer(game, playerId) && !game.awaitingCross) {
@@ -238,9 +249,3 @@ function isExtraDiePickPhase(game: Game): boolean {
   return game.phase === "active_extra" || game.phase === "passive_extra";
 }
 
-function extraDieTargets(game: Game): string[] {
-  return game.dice
-    .filter((die) => die.location !== "consumed")
-    .filter((die) => !game.extraDieUsedIds.includes(die.id))
-    .map((die) => die.id);
-}

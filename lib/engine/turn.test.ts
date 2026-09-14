@@ -256,9 +256,8 @@ describe("turn flow", () => {
 
     expect(game.round).toBe(2);
     expect(game.activePlayerIndex).toBe(0);
-    expect(game.players.every((player) => player.sheet.plusOnes === 1)).toBe(
-      true,
-    );
+    expect(game.players[0].sheet.plusOnes).toBe(1);
+    expect(game.players[1].sheet.plusOnes).toBe(0);
     expect(game.players.every((player) => player.sheet.rerolls === 1)).toBe(
       true,
     );

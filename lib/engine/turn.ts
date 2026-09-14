@@ -168,7 +168,7 @@ export function advanceTurn(game: Game): Game {
         slotIndex: undefined,
       })),
     };
-    next = beginRound(next, { applyGrants: roundAdvanced });
+    next = beginRound(next);
   }
 
   return next;

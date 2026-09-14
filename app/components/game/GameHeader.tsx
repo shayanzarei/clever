@@ -28,12 +28,16 @@ export function GameHeader({ game }: GameHeaderProps) {
         <p className="game-header__round text-[10px] font-bold tracking-widest text-muted uppercase">
           Round {game.round} / {game.maxRounds}
         </p>
-        <h2 className="game-header__phase text-base font-semibold leading-tight text-white">
-          {PHASE_LABELS[game.phase]}
-        </h2>
-        {active && game.phase !== "finished" && (
-          <p className="game-header__active text-xs text-muted">Active: {active.name}</p>
-        )}
+        <div className="game-header__headline">
+          <h2 className="game-header__phase text-base font-semibold leading-tight text-white">
+            {PHASE_LABELS[game.phase]}
+          </h2>
+          {active && game.phase !== "finished" && (
+            <p className="game-header__active text-xs text-muted">
+              Active: {active.name}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="game-header__players">
@@ -45,16 +49,14 @@ export function GameHeader({ game }: GameHeaderProps) {
               player.id === active?.id ? "player-chip--active" : "",
             ].join(" ")}
           >
-            <div className="player-chip__meta">
-              <p className="player-chip__name">{player.name}</p>
-              <p className="player-chip__pts">{scoreSheet(player.sheet)} pts</p>
-            </div>
+            <p className="player-chip__name">{player.name}</p>
             <ActionStock
               plusOnes={player.sheet.plusOnes}
               rerolls={player.sheet.rerolls}
               extraDice={player.sheet.extraDice}
               size="sm"
             />
+            <p className="player-chip__pts">{scoreSheet(player.sheet)} pts</p>
           </div>
         ))}
       </div>

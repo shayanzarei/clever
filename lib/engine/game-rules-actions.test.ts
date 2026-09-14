@@ -18,6 +18,7 @@ import { activePlayerId } from "./turn";
 import { reduceWithInvariants as reduce, sheetWithLegacyExtraDice, sheetWithPlusOnes, sheetWithRerolls } from "./test-reduce";
 import { beginRound } from "./turn";
 import { createEmptySheet } from "./sheet";
+import { extraDieClickableIds } from "@/lib/ui/extra-die-targets";
 import type { DieFace, Game } from "./types";
 
 const FULL_ROLL: DieFace[] = [
@@ -452,6 +453,52 @@ describe("rule: extra die (+1) action", () => {
     });
 
     expect(game.players[1].sheet.plusOnes).toBe(0);
+    expect(game.players[1].sheet.orange.boxes[0].value).toBe(5);
+  });
+
+  it("lets a passive player extra-die an active slot after taking a leftover", () => {
+    let game = completeActiveTurn(startGame());
+    game = {
+      ...game,
+      players: game.players.map((player, index) =>
+        index === 1
+          ? { ...player, sheet: sheetWithPlusOnes(player.sheet, 1) }
+          : player,
+      ),
+    };
+
+    expect(game.dice.find((die) => die.id === "die-orange")?.location).toBe(
+      "slot",
+    );
+
+    game = reduce(game, {
+      type: "PASSIVE_TAKE",
+      playerId: "p2",
+      dieId: "die-blue",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p2",
+      color: "blue",
+      blueDie: 3,
+      whiteDie: 1,
+    });
+
+    expect(game.phase).toBe("passive_extra");
+    expect(extraDieClickableIds(game)).toContain("die-orange");
+
+    game = reduce(game, {
+      type: "USE_EXTRA_DIE",
+      playerId: "p2",
+      dieId: "die-orange",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p2",
+      color: "orange",
+      value: 5,
+    });
+
     expect(game.players[1].sheet.orange.boxes[0].value).toBe(5);
   });
 

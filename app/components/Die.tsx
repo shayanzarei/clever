@@ -72,8 +72,10 @@ export function Die({
     isSelected
       ? `ring-2 ring-offset-2 ring-offset-[#13111c] ${RING_STYLES[color]}`
       : "",
-    isHighlighted && !isSelected ? "scale-105 shadow-md" : "",
-    interactive ? "cursor-pointer hover:brightness-110" : "",
+    isHighlighted && !isSelected
+      ? `scale-105 shadow-md ring-2 ring-offset-2 ring-offset-[#13111c] ${RING_STYLES[color]}`
+      : "",
+    interactive ? "cursor-pointer hover:brightness-110 touch-manipulation" : "",
     disabled && !isUsed ? "opacity-45" : "",
     className,
   ]
@@ -99,7 +101,12 @@ export function Die({
   }
 
   return (
-    <button type="button" className={face} title={label} onClick={onClick}>
+    <button
+      type="button"
+      className={`${face} before:absolute before:-inset-2 before:content-['']`}
+      title={label}
+      onClick={onClick}
+    >
       {content}
     </button>
   );

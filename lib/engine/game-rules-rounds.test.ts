@@ -1,7 +1,7 @@
 /**
  * Rule: The game is played over 4 (4 players), 5 (3 players), or 6 (1 and 2
- * player) rounds. At the start of the first 4 rounds, each player gets 1 bonus
- * as shown on the round tracker (round 4: choose 1 of 2 options).
+ * player) rounds. Each player receives the round-tracker bonus when they
+ * become the active player in that round (round 4: choose 1 of 2 options).
  */
 import { describe, expect, it } from "vitest";
 import { reduceWithInvariants as reduce } from "./test-reduce";
@@ -11,7 +11,7 @@ import {
   beginRoundFourBonus,
   isSilverBonusRound,
 } from "./round-start";
-import { beginRound } from "./turn";
+import { advanceTurn, beginRound } from "./turn";
 import type { Game } from "./types";
 
 function startGame(playerCount: 2 | 3 | 4): Game {
@@ -71,21 +71,36 @@ describe("rule: round-tracker bonuses for rounds 1–3", () => {
     const roundOne = beginRound(beforeGrant, { applyGrants: false });
     const withGrant = applyRoundStartActions(roundOne, 1);
 
-    expect(withGrant.players.every((p) => p.sheet.rerolls === 1)).toBe(true);
+    expect(withGrant.players[0].sheet.rerolls).toBe(1);
+    expect(withGrant.players[1].sheet.rerolls).toBe(0);
     expect(withGrant.players.every((p) => p.sheet.plusOnes === 0)).toBe(true);
   });
 
-  it("grants the round bonus to every player when a new round begins", () => {
+  it("grants the round bonus only to the active player when they become active", () => {
     let game = startGame(4);
-    expect(game.players.every((p) => p.sheet.rerolls === 1)).toBe(true);
+    expect(game.players[0].sheet.rerolls).toBe(1);
+    expect(game.players.slice(1).every((p) => p.sheet.rerolls === 0)).toBe(true);
 
-    game = { ...game, round: 2 };
-    game = applyRoundStartActions(game, 2);
-    expect(game.players.every((p) => p.sheet.plusOnes === 1)).toBe(true);
+    game = applyRoundStartActions({ ...game, round: 2 }, 2);
+    expect(game.players[0].sheet.plusOnes).toBe(1);
+    expect(game.players.slice(1).every((p) => p.sheet.plusOnes === 0)).toBe(true);
 
-    game = { ...game, round: 3 };
-    game = applyRoundStartActions(game, 3);
-    expect(game.players.every((p) => p.sheet.rerolls === 2)).toBe(true);
+    game = beginRound({ ...game, activePlayerIndex: 1 });
+    expect(game.players.map((p) => p.sheet.plusOnes)).toEqual([1, 1, 0, 0]);
+
+    game = applyRoundStartActions({ ...game, round: 3, activePlayerIndex: 0 }, 3);
+    expect(game.players[0].sheet.rerolls).toBe(2);
+    expect(game.players.slice(1).every((p) => p.sheet.rerolls === 0)).toBe(true);
+  });
+
+  it("unlocks the next player's round bonus when they become active", () => {
+    let game = applyRoundStartActions({ ...startGame(4), round: 2 }, 2);
+    expect(game.players.map((p) => p.sheet.plusOnes)).toEqual([1, 0, 0, 0]);
+
+    game = advanceTurn(game);
+    expect(game.round).toBe(2);
+    expect(game.activePlayerIndex).toBe(1);
+    expect(game.players.map((p) => p.sheet.plusOnes)).toEqual([1, 1, 0, 0]);
   });
 });
 
