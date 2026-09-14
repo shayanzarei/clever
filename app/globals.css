@@ -106,6 +106,35 @@ body {
   gap: 0.5rem;
 }
 
+.game-header__status {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.game-header__headline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.game-header__phase {
+  min-width: 0;
+  margin: 0;
+}
+
+.game-header__active {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .game-header__players {
   display: flex;
   flex-wrap: wrap;
@@ -114,13 +143,14 @@ body {
 
 .player-chip {
   display: flex;
-  min-width: 8.5rem;
-  flex-direction: column;
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
   gap: 0.3rem;
   border-radius: 0.75rem;
   border: 1px solid var(--color-line);
   background: var(--color-ink);
-  padding: 0.4rem 0.5rem;
+  padding: 0.28rem 0.4rem;
 }
 
 .player-chip--active {
@@ -128,22 +158,31 @@ body {
   background: var(--color-elevated);
 }
 
-.player-chip__meta {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
 .player-chip__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.75rem;
   font-weight: 700;
+  line-height: 1.15;
   color: #fff;
 }
 
 .player-chip__pts {
-  font-size: 0.7rem;
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.player-chip .action-stock {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
 }
 
 .action-stock {
@@ -346,23 +385,67 @@ body {
 
   .game-header {
     flex: 0 0 auto;
-    padding: 0.45rem 0.6rem;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.28rem 0.45rem;
+  }
+
+  .game-header__phase {
+    font-size: 0.88rem;
+  }
+
+  .game-header__active {
+    font-size: 0.68rem;
   }
 
   .game-header__players {
+    width: 100%;
     flex-wrap: nowrap;
     overflow-x: auto;
-    gap: 0.35rem;
-    padding-bottom: 0.1rem;
+    gap: 0.25rem;
+    padding-bottom: 0.05rem;
   }
 
   .player-chip {
-    min-width: 6.5rem;
+    min-width: auto;
     flex: 0 0 auto;
+    gap: 0.22rem;
+    padding: 0.14rem 0.3rem;
+    border-radius: 0.5rem;
+  }
+
+  .player-chip__name {
+    flex: 0 1 auto;
+    max-width: 4.6rem;
+    font-size: 0.62rem;
+  }
+
+  .player-chip__pts {
+    margin-left: 0;
+    font-size: 0.55rem;
   }
 
   .player-chip .action-stock {
-    display: none;
+    flex-shrink: 0;
+    gap: 0.14rem;
+  }
+
+  .player-chip .action-stock__item {
+    min-width: 0;
+    padding: 0.04rem 0.18rem;
+    gap: 0.1rem;
+    border-radius: 0.35rem;
+  }
+
+  .player-chip .action-stock__label {
+    font-size: 0.48rem;
+    letter-spacing: 0;
+  }
+
+  .player-chip .action-stock__count {
+    font-size: 0.62rem;
+    min-width: 0.5rem;
+    text-align: center;
   }
 
   .game-board__sheets {
@@ -432,11 +515,7 @@ body {
   }
 
   .player-chip {
-    min-width: 7rem;
-  }
-
-  .player-chip .action-stock {
-    display: none;
+    min-width: 8.25rem;
   }
 
   .game-board__toolbar {
@@ -739,12 +818,6 @@ textarea::placeholder {
     border-radius: 0.75rem;
   }
 
-  .game-header__status {
-    display: flex;
-    flex-direction: column;
-    gap: 0.05rem;
-  }
-
   .game-header__round {
     font-size: 0.5rem;
     letter-spacing: 0.14em;
@@ -757,7 +830,7 @@ textarea::placeholder {
   }
 
   .game-header__active {
-    display: none;
+    font-size: 0.62rem;
   }
 
   .game-header__players {
@@ -769,37 +842,18 @@ textarea::placeholder {
   .player-chip {
     flex: 1 1 calc(50% - 0.2rem);
     min-width: 0;
-    flex-direction: row;
-    align-items: center;
     gap: 0.3rem;
-    padding: 0.26rem 0.34rem;
+    padding: 0.2rem 0.34rem;
     border-radius: 0.55rem;
-  }
-
-  .player-chip__meta {
-    flex: 1 1 auto;
-    min-width: 0;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
   }
 
   .player-chip__name {
     font-size: 0.66rem;
-    line-height: 1.15;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
+    max-width: none;
   }
 
   .player-chip__pts {
     font-size: 0.58rem;
-    line-height: 1.1;
-  }
-
-  .player-chip:not(.player-chip--active) .action-stock {
-    display: none;
   }
 
   .player-chip .action-stock {
