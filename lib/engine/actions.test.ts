@@ -4,6 +4,7 @@ import { activePlayerId } from "./turn";
 import { reduceWithInvariants as reduce, sheetWithLegacyExtraDice, sheetWithPlusOnes, sheetWithRerolls } from "./test-reduce";
 import { beginRoundFourBonus } from "./round-start";
 import { beginRound } from "./turn";
+import { extraDieUsedIdsFor } from "./extra-die-used";
 import type { DieFace, Game } from "./types";
 
 const FULL_ROLL: DieFace[] = [
@@ -332,7 +333,7 @@ describe("sheet actions", () => {
     });
 
     expect(game.players[0].sheet.plusOnes).toBe(0);
-    expect(game.extraDieUsedIds).toContain("die-white");
+    expect(extraDieUsedIdsFor(game, "p1")).toContain("die-white");
   });
 
   it("USE_EXTRA_DIE after active turn allows a fourth mark", () => {
@@ -359,7 +360,7 @@ describe("sheet actions", () => {
 
     expect(game.phase).toBe("passive_choose");
     expect(game.players[0].sheet.extraDice).toBe(0);
-    expect(game.extraDieUsedIds).toContain("die-green");
+    expect(extraDieUsedIdsFor(game, "p1")).toContain("die-green");
   });
 
   it("rejects using the same die twice as an extra die", () => {

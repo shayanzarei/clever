@@ -137,6 +137,40 @@ describe("rule: round 4 silver bonus (choose 1 of 2 options)", () => {
     expect(next.players.every((p) => p.sheet.plusOnes === 1)).toBe(true);
     expect(next.players.every((p) => p.sheet.rerolls === 2)).toBe(true);
   });
+
+  it("keeps unused +1 actions when play advances into round 4", () => {
+    const base = startGame(4);
+    const lateRoundThree: Game = {
+      ...base,
+      round: 3,
+      activePlayerIndex: 3,
+      phase: "passive_choose",
+      players: base.players.map((player) => ({
+        ...player,
+        sheet: {
+          ...player.sheet,
+          plusOnes: 2,
+          plusOnesEarned: 2,
+          rerolls: 1,
+          rerollsEarned: 2,
+        },
+      })),
+    };
+
+    let game = advanceTurn(lateRoundThree);
+    expect(game.round).toBe(4);
+    expect(game.phase).toBe("round_bonus_choose");
+    expect(game.players.map((player) => player.sheet.plusOnes)).toEqual([
+      2, 2, 2, 2,
+    ]);
+
+    game = advanceTurn(game);
+    expect(game.round).toBe(4);
+    expect(game.activePlayerIndex).toBe(1);
+    expect(game.players.map((player) => player.sheet.plusOnes)).toEqual([
+      2, 2, 2, 2,
+    ]);
+  });
 });
 
 describe("rule: no round-tracker bonus after round 4", () => {

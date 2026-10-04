@@ -50,7 +50,7 @@ function resetTurnForNextCross(game: Game): Game {
     awaitingCross: null,
     passiveCompletedPlayerIds: [],
     roundBonusPendingPlayerIds: [],
-    extraDieUsedIds: [],
+    extraDieUsedIds: {},
     extraDieActionsUsed: {},
     players: game.players.map((player) => ({
       ...player,
