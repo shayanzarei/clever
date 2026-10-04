@@ -1,15 +1,20 @@
 import type { ExtraDieUsedIds, Game } from "./types";
 
+function extraDieUsedByPlayer(
+  ids: ExtraDieUsedIds,
+): Readonly<Record<string, readonly string[]>> {
+  if (Array.isArray(ids)) {
+    return {};
+  }
+  return ids as Readonly<Record<string, readonly string[]>>;
+}
+
 /** Saved games used a shared list; extra die is per player. */
 export function extraDieUsedIdsFor(
   game: Pick<Game, "extraDieUsedIds">,
   playerId: string,
 ): readonly string[] {
-  const ids = game.extraDieUsedIds;
-  if (Array.isArray(ids)) {
-    return [];
-  }
-  return ids[playerId] ?? [];
+  return extraDieUsedByPlayer(game.extraDieUsedIds)[playerId] ?? [];
 }
 
 export function recordExtraDieUsed(
@@ -17,10 +22,7 @@ export function recordExtraDieUsed(
   playerId: string,
   dieId: string,
 ): ExtraDieUsedIds {
-  const ids = game.extraDieUsedIds;
-  const byPlayer: Record<string, readonly string[]> = Array.isArray(ids)
-    ? {}
-    : { ...ids };
+  const byPlayer = { ...extraDieUsedByPlayer(game.extraDieUsedIds) };
   return {
     ...byPlayer,
     [playerId]: [...(byPlayer[playerId] ?? []), dieId],
