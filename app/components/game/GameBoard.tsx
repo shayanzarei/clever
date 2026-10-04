@@ -216,7 +216,7 @@ function getClickableDice(
   extraDieMode: boolean,
 ): string[] {
   if (extraDieMode || isExtraDiePickPhase(game)) {
-    return extraDieClickableIds(game);
+    return extraDieClickableIds(game, playerId);
   }
 
   if (game.phase === "active_choose" && isActivePlayer(game, playerId) && !game.awaitingCross) {

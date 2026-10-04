@@ -14,6 +14,11 @@ export type DieFace = {
 
 export type DieLocation = "pool" | "tray" | "slot" | "consumed";
 
+/** Legacy games stored a shared list; extra die usage is per player. */
+export type ExtraDieUsedIds =
+  | readonly string[]
+  | Readonly<Record<string, readonly string[]>>;
+
 export type DieState = DieFace & {
   id: string;
   location: DieLocation;
@@ -129,8 +134,8 @@ export type Game = {
   passiveCompletedPlayerIds: readonly string[];
   /** Players who still owe a round-4 bonus choice. */
   roundBonusPendingPlayerIds: readonly string[];
-  /** Die ids already used via extra-die actions this turn. */
-  extraDieUsedIds: readonly string[];
+  /** Die ids each player already used via extra-die this turn. */
+  extraDieUsedIds: ExtraDieUsedIds;
   /** Extra-die actions spent by each player this turn. */
   extraDieActionsUsed: Readonly<Record<string, number>>;
 };

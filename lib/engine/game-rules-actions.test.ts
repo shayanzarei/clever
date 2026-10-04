@@ -1,7 +1,7 @@
 /**
  * Rule: Reroll and extra-die (+1) actions — unlock onto action stock, consume FIFO,
  * may be saved; reroll is active-only and rerolls all pool dice; extra die is
- * end-of-turn only, any die once per turn.
+ * end-of-turn only, any die once per player per turn.
  */
 import { describe, expect, it } from "vitest";
 import { poolDice } from "./dice";
@@ -19,6 +19,7 @@ import { reduceWithInvariants as reduce, sheetWithLegacyExtraDice, sheetWithPlus
 import { beginRound } from "./turn";
 import { createEmptySheet } from "./sheet";
 import { extraDieClickableIds } from "@/lib/ui/extra-die-targets";
+import { extraDieUsedIdsFor } from "./extra-die-used";
 import type { DieFace, Game } from "./types";
 
 const FULL_ROLL: DieFace[] = [
@@ -349,7 +350,7 @@ describe("rule: extra die (+1) action", () => {
     });
 
     expect(game.players[0].sheet.plusOnes).toBe(0);
-    expect(game.extraDieUsedIds).toContain("die-green");
+    expect(extraDieUsedIdsFor(game, "p1")).toContain("die-green");
   });
 
   it("rejects choosing the same die twice in one turn", () => {
@@ -423,7 +424,7 @@ describe("rule: extra die (+1) action", () => {
     });
 
     expect(game.players[0].sheet.extraDice).toBe(0);
-    expect(game.extraDieUsedIds).toEqual(
+    expect(extraDieUsedIdsFor(game, "p1")).toEqual(
       expect.arrayContaining(["die-green", "die-white"]),
     );
   });
@@ -485,7 +486,7 @@ describe("rule: extra die (+1) action", () => {
     });
 
     expect(game.phase).toBe("passive_extra");
-    expect(extraDieClickableIds(game)).toContain("die-orange");
+    expect(extraDieClickableIds(game, "p2")).toContain("die-orange");
 
     game = reduce(game, {
       type: "USE_EXTRA_DIE",
@@ -500,6 +501,64 @@ describe("rule: extra die (+1) action", () => {
     });
 
     expect(game.players[1].sheet.orange.boxes[0].value).toBe(5);
+  });
+
+  it("lets a passive extra-die a used die after the active player extra-died it", () => {
+    let game = startGame();
+    game = {
+      ...game,
+      players: game.players.map((player) => ({
+        ...player,
+        sheet: sheetWithPlusOnes(player.sheet, 1),
+      })),
+    };
+    game = completeActiveTurn(game, { skipPlusOne: false });
+    expect(game.phase).toBe("active_extra");
+
+    game = reduce(game, {
+      type: "USE_EXTRA_DIE",
+      playerId: "p1",
+      dieId: "die-green",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p1",
+      color: "green",
+      value: 4,
+    });
+
+    expect(game.phase).toBe("passive_choose");
+    expect(extraDieUsedIdsFor(game, "p1")).toContain("die-green");
+
+    game = reduce(game, {
+      type: "PASSIVE_TAKE",
+      playerId: "p2",
+      dieId: "die-blue",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p2",
+      color: "blue",
+      blueDie: 3,
+      whiteDie: 1,
+    });
+
+    expect(game.phase).toBe("passive_extra");
+    expect(extraDieClickableIds(game, "p2")).toContain("die-green");
+
+    game = reduce(game, {
+      type: "USE_EXTRA_DIE",
+      playerId: "p2",
+      dieId: "die-green",
+    });
+    game = reduce(game, {
+      type: "CROSS",
+      playerId: "p2",
+      color: "green",
+      value: 4,
+    });
+
+    expect(game.players[1].sheet.green.boxes[0].crossed).toBe(true);
   });
 
   it("stays in extra-die phase after a +1 mark that unlocks a choice bonus", () => {

@@ -89,7 +89,7 @@ export function clearActiveTurnState(game: Game): Game {
     activeRollCount: 0,
     awaitingCross: null,
     passiveCompletedPlayerIds: [],
-    extraDieUsedIds: [],
+    extraDieUsedIds: {},
     extraDieActionsUsed: {},
     players: game.players.map((player) => ({
       ...player,

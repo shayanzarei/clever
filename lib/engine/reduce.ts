@@ -35,6 +35,7 @@ import {
   roundBonusEffect,
 } from "./round-start";
 import { consumeExtraDie, consumeReroll } from "./sheet-actions";
+import { extraDieUsedIdsFor, recordExtraDieUsed } from "./extra-die-used";
 import { createEmptySheet } from "./sheet";
 import {
   activePlayerId,
@@ -243,7 +244,7 @@ function finishExtraDieCross(game: Game, playerId: string): Game {
     updatePlayer(game, playerId, { sheet: consumeExtraDie(player.sheet) }),
     {
       awaitingCross: null,
-      extraDieUsedIds: [...game.extraDieUsedIds, dieId],
+      extraDieUsedIds: recordExtraDieUsed(game, playerId, dieId),
       extraDieActionsUsed: {
         ...game.extraDieActionsUsed,
         [playerId]: (game.extraDieActionsUsed[playerId] ?? 0) + 1,
@@ -326,7 +327,7 @@ function startGame(action: Extract<Action, { type: "START_GAME" }>): Game {
     awaitingCross: null,
     passiveCompletedPlayerIds: [],
     roundBonusPendingPlayerIds: [],
-    extraDieUsedIds: [],
+    extraDieUsedIds: {},
     extraDieActionsUsed: {},
   };
 
@@ -516,7 +517,7 @@ function useExtraDie(
   if (!canUseExtraDie(game, action.playerId)) {
     throw new Error("USE_EXTRA_DIE is only allowed at the end of a main or passive turn");
   }
-  if (game.extraDieUsedIds.includes(action.dieId)) {
+  if (extraDieUsedIdsFor(game, action.playerId).includes(action.dieId)) {
     throw new Error("Die already used for an extra-die action this turn");
   }
 
